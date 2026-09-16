@@ -51,14 +51,14 @@ if (requestedItem) {
   state = {...structuredClone(DEFAULTS),stat:'',recovery:'auto',item:requestedItem.id,level:requestedItem.level,part:requestedItem.part};
   if (requestedItem.parts?.includes(Number(query.get('part')))) state.part=Number(query.get('part'));
   const candidate = {...state};
-  for (const key of ['target','threshold']) if(query.has(key)) candidate[key]=Number(query.get(key));
+  for (const key of ['start','target','threshold']) if(query.has(key)) candidate[key]=Number(query.get(key));
   if(query.has('stat')) candidate.stat=query.get('stat');
   try {validate(candidate);state=candidate;} catch { /* Invalid optional URL values are ignored. */ }
 }
 
 loadEquipmentPrice();
 if (['reset','preserve','auto'].includes(query.get('recovery'))) state.recovery=query.get('recovery');
-state.start = 0;
+state.start = Math.max(0,Math.min(27,state.start));
 state.target = state.target === 0 ? 0 : Math.max(17,Math.min(27,state.target));
 if (['STR','DEX','INT','LUK'].includes(state.stat)) state.stat='주스탯';
 if (!['주스탯','올스탯','공격력','마력','쿨타임 감소','크리티컬 데미지'].includes(state.stat)) state.stat = '';
@@ -126,11 +126,11 @@ function form() {
       <div class="price-source"><span id="price-note"></span><button type="button" class="text-button" id="reset-price">기본 가격으로</button></div>
       ${page !== 'starforce' ? `${field('목표 잠재', 'stat', select('stat', targetStats()))}${field(`목표 합계 (${targetUnit()}) 이상`, 'threshold', select('threshold', targetThresholds().map(n=>[n,`${n}${targetUnit()} 이상`])) )}` : ''}
       ${page !== 'starforce' ? `${field('목표 에디셔널','additionalStat',select('additionalStat',additionalStats()))}${field('에디셔널 합계 (%) 이상','additionalThreshold',select('additionalThreshold',additionalThresholds(state,data.additional).map(n=>[n,`${n}${additionalUnit()} 이상`])))}<p class="hint additional-hint">에디셔널은 별도 레전드리 목표입니다. 주스탯에는 올스탯%를 포함하며, 고정 스탯·9레벨당 스탯은 %로 환산하지 않습니다. 일반 잠재도 주스탯이면 같은 스탯을 맞추는 순서로 계산합니다.</p>` : ''}
-      ${page !== 'potential' ? `<div class="star-target-field"><span id="star-target-title">목표 스타포스</span><input type="hidden" id="target" value="${state.target}"><div class="chips star-target-buttons" role="group" aria-labelledby="star-target-title">${[0,17,18,19,20,21,22,23,24,25,26,27].map(n=>`<button type="button" data-target="${n}" aria-pressed="${state.target===n}">${n?`${n}성`:'선택 없음'}</button>`).join('')}</div><p class="hint">선택 없음이면 스타포스 강화·복구 비용을 제외합니다.</p></div>` : ''}
+      ${page !== 'potential' ? `${field('시작 스타포스','start',select('start',Array.from({length:28},(_,n)=>[n,`${n}성`])))}<div class="star-target-field"><span id="star-target-title">목표 스타포스</span><input type="hidden" id="target" value="${state.target}"><div class="chips star-target-buttons" role="group" aria-labelledby="star-target-title">${[0,17,18,19,20,21,22,23,24,25,26,27].map(n=>`<button type="button" data-target="${n}" aria-pressed="${state.target===n}">${n?`${n}성`:'선택 없음'}</button>`).join('')}</div><p class="hint">시작 성수부터 목표까지 계산합니다. 선택 없음이면 스타포스 강화·복구 비용을 제외합니다.</p></div>` : ''}
       </div>
       <p class="hint">장비 가격은 최초 장비와 스페어에 공통 적용합니다. 0이면 장비 구매비를 제외합니다.</p>
       ${page !== 'starforce' ? '<p class="notice" id="potential-rule"></p>' : ''}
-      <p class="hint">${page !== 'starforce' ? '잠재: 선택한 시작 등급부터 등업 포함 · 선택 없음이면 비용 제외 · 천장 누적 0회 · 에디셔널 별도 선택' : ''}${page === 'combined' ? '<br>' : ''}${page !== 'potential' ? '스타포스: 0성부터 목표까지 강화·파괴 복구 비용 포함' : ''}</p>
+      <p class="hint">${page !== 'starforce' ? '잠재: 선택한 시작 등급부터 등업 포함 · 선택 없음이면 비용 제외 · 천장 누적 0회 · 에디셔널 별도 선택' : ''}${page === 'combined' ? '<br>' : ''}${page !== 'potential' ? '스타포스: 선택한 시작 성수부터 목표까지 강화·파괴 복구 비용 포함' : ''}</p>
       ${page === 'potential' ? `<details class="potential-settings" open><summary>상세 옵션 · 잠재능력</summary>${potentialStart()}${additionalStart()}${potentialEvents()}</details>` : ''}</section>
       ${page !== 'potential' ? `<details class="card option-card" open><summary><span class="step">03</span> 상세 옵션 <span class="summary-hint">이벤트 · 할인 · 파괴 방지 · 복구</span></summary>
       <div class="option-row"><strong>잠재능력</strong><div>${potentialStart()}</div></div>
@@ -162,6 +162,7 @@ function form() {
     compute();
   });
   $('calculator').addEventListener('change', e => {
+    if (e.target.id === 'start' && Number($('target').value)>0 && Number($('start').value)>Number($('target').value)) $('target').value=Math.max(17,Number($('start').value));
     if (e.target.id === 'purchase') saveEquipmentPrice();
     if (e.target.id === 'item') {
       const item = ITEMS.find(i => i.id === $('item').value);
@@ -216,7 +217,6 @@ function form() {
   $('clear-costs')?.addEventListener('click', () => { state.costOverrides = {}; renderAdvanced(); compute(); });
 }
 function readForm() {
-  state.start = 0;
   state.allStat = true;
   state.achieved = false;
   for (const key of Object.keys(DEFAULTS)) {
@@ -268,6 +268,7 @@ function renderAdvanced() {
   if (!$('cost-fields')) return;
   $('star-label').textContent = state.target === 0 ? '선택 없음' : state.target;
   document.querySelectorAll('[data-target]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.target)===state.target)));
+  document.querySelectorAll('[data-target]').forEach(b=>b.disabled=Number(b.dataset.target)>0 && Number(b.dataset.target)<state.start);
   document.querySelectorAll('[data-mvp]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.mvp)===state.mvp)));
   document.querySelectorAll('[data-guard]').forEach(b=>{b.disabled=state.guarantee && Number(b.dataset.guard)===15; b.setAttribute('aria-pressed',String(isSafeguarded(Number(b.dataset.guard),state)));});
   const preset = !state.discount && !state.destroyDiscount && !state.guarantee && !state.recoveryDiscount ? 'none'
@@ -315,7 +316,7 @@ function compute() {
       const policy=result.starforce?.recoveryStages;
       $('recovery-result').textContent=!result.starforce ? '스타포스 선택 없음 · 복구 비용 제외' : policy ? '자동 복구: '+Object.entries(policy).map(([star,mode])=>`${star}성 파괴 → ${mode==='reset'?'12성':Math.min(Number(star),22)+'성 유지'}`).join(' / ') : state.recovery==='reset'?'모든 파괴에 12성 복구 적용':'모든 파괴에 성수 유지 복구 적용 (최대 22성)';
     }
-    if (page !== 'potential') $('stage-rows').innerHTML = stageBreakdown(state).map(row=>`<tr><td>${row.star}성 → ${row.star+1}성</td><td>${money(row.cost)}</td><td>${money(row.cumulative)}</td><td>${number(row.destroys)}회</td><td>${number(row.attempts)}회</td></tr>`).join('') || '<tr><td colspan="5">스타포스 선택 없음 · 강화·복구 비용 제외</td></tr>';
+    if (page !== 'potential') $('stage-rows').innerHTML = stageBreakdown(state).map(row=>`<tr><td>${row.star}성 → ${row.star+1}성</td><td>${money(row.cost)}</td><td>${money(row.cumulative)}</td><td>${number(row.destroys)}회</td><td>${number(row.attempts)}회</td></tr>`).join('') || `<tr><td colspan="5">${state.target===0?'스타포스 선택 없음':'시작과 목표 성수 동일'} · 강화·복구 비용 없음</td></tr>`;
   } catch (error) {
     if ($('recovery-result')) $('recovery-result').textContent=state.recovery==='auto'?'자동 복구 비교 대기 · 입력 조건을 확인해 주세요.':'';
     if ($('guard-result')) $('guard-result').textContent=state.autoSafeguard?'자동 선택 대기 · 입력 조건을 확인해 주세요.':'수동 선택';

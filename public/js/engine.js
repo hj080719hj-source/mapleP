@@ -30,7 +30,8 @@ export function validate(s) {
   if (!['', '주스탯', '올스탯', 'STR', 'DEX', 'INT', 'LUK','공격력','마력','쿨타임 감소','크리티컬 데미지'].includes(s.stat)) throw new Error('목표 스탯을 선택해주세요.');
   finiteRange(s.threshold, s.stat === '쿨타임 감소' ? 1 : s.stat === '크리티컬 데미지' ? 8 : 9, s.stat === '쿨타임 감소' ? 6 : s.stat === '크리티컬 데미지' ? 24 : 39, '목표 옵션', true);
   finiteRange(s.start, 0, 27, '현재 스타포스', true);
-  finiteRange(s.target, s.start, 27, '목표 스타포스', true);
+  finiteRange(s.target, 0, 27, '목표 스타포스', true);
+  if (s.target !== 0 && s.target < s.start) throw new Error('목표 스타포스는 시작 성수 이상으로 선택해주세요.');
   finiteRange(s.spare, 0, 100000, '스페어 가격');
   finiteRange(s.purchase, 0, 100000, '시작 장비 구매비');
   if (!['reset', 'preserve','auto'].includes(s.recovery)) throw new Error('복구 방식을 선택해주세요.');
@@ -309,6 +310,7 @@ export function calculate(s, data, mode = 'combined') {
 }
 export function stageBreakdown(s) {
   validate(s);
+  if (s.target === 0) return [];
   let previous = {cost:0, destroys:0, attempts:0};
   return Array.from({length:s.target-s.start}, (_,i) => {
     const target = s.start+i+1;

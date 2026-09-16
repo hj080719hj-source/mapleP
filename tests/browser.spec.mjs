@@ -59,7 +59,7 @@ test('reference-style equipment buttons, sliders, events and detailed table stay
   // Compare the star-only table with the total without initial purchase cost.
   await page.locator('#purchase').fill('0');
   await page.locator('#purchase').dispatchEvent('change');
-  await expect(page.locator('#start-range, #start')).toHaveCount(0);
+  await expect(page.locator('#start-range')).toHaveCount(0);
   await page.locator('[data-target="18"]').click();
   await expect(page.locator('#target')).toHaveValue('18');
   const before = await page.locator('.total').textContent();

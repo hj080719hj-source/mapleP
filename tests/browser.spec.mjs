@@ -12,7 +12,7 @@ test('default example, live updates, errors and page persistence', async ({page}
   const before = await page.locator('.total').textContent();
   await expect(page.locator('#spare, .equipment-custom')).toHaveCount(0);
   await page.locator('#purchase').fill('5');
-  await page.getByRole('button',{name:'기대 비용 계산하기'}).click();
+
   await expect(page.locator('.total')).not.toHaveText(before);
   await page.locator('[data-target="18"]').click();
   await expect(page.locator('.total')).not.toHaveText(before);
@@ -37,14 +37,14 @@ test('equipment, custom fields, manual costs and preserve recovery', async ({pag
   await expect(page.locator('.total')).toBeVisible();
   await page.locator('#recovery-cost-details summary').click();
   for(const input of await page.locator('[data-recovery]').all()) await input.fill('100000000');
-  await page.getByRole('button',{name:'기대 비용 계산하기'}).click();
+
   await expect(page.locator('.total')).toBeVisible();
   await page.locator('#cost-details summary').click();
   for(const input of await page.locator('[data-cost]').all()) await input.fill('100');
   await page.locator('[data-cost]').last().dispatchEvent('change');
-  await page.getByRole('button',{name:'기대 비용 계산하기'}).click();
+
   await expect(page.locator('.result-badge')).toHaveText('입력 비용 기준');
-  await page.getByRole('button',{name:'초기화',exact:true}).click();
+  await page.getByRole('button',{name:'기본 설정으로',exact:true}).click();
   await expect(page.locator('#item')).toHaveValue('dreamy');
   await expect(page.locator('#spare')).toHaveCount(0);
 });

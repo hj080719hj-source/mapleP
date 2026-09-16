@@ -21,7 +21,7 @@ export function mountSimulation(getSettings,data,mode) {
   const form=document.querySelector('#calculator');
   form.addEventListener('input',invalidate);
   form.addEventListener('change',invalidate);
-  form.addEventListener('click',e=>{if(e.target.closest('[data-item],[data-part],[data-event],[data-mvp],[data-guard],#reset,#clear-costs'))invalidate();});
+  form.addEventListener('click',e=>{if(e.target.closest('[data-item],[data-part],[data-event],[data-mvp],[data-guard],#reset,#reset-price,#clear-costs'))invalidate();});
   stop.addEventListener('click',()=>{generation++;idle();status.textContent='중지됨 · 아래는 중지 시점까지 사용한 비용입니다.';});
   start.addEventListener('click',()=>{
     generation++;const token=generation;

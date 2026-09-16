@@ -145,15 +145,21 @@ function form() {
       <p class="hint" id="recovery-result" role="status"></p>
       <div id="recovery-fields"></div><p class="hint">스타캐치 성공 보정 상시 적용 · 실패 시 별 하락 없음</p>
       <details id="cost-details"><summary>단계별 강화 비용 확인 · 직접 수정</summary><p class="hint">기본값은 추정 산식입니다. 인게임의 할인·파괴 방지까지 적용된 <strong>최종 1회 비용</strong>을 메소 단위로 입력하면 해당 값을 우선 사용합니다. 이벤트를 바꿨다면 직접 입력한 비용도 수정해주세요.</p><div class="table-scroll"><table><thead><tr><th>강화 단계</th><th>1회 최종 비용 (메소)</th></tr></thead><tbody id="cost-fields"></tbody></table></div><button type="button" class="text-button" id="clear-costs">직접 입력한 비용 지우기</button></details></details>` : ''}
-      <div id="form-error" class="error" role="alert" hidden></div><div class="form-actions"><button class="primary" type="submit">기대 비용 계산하기 <span>↗</span></button><button class="secondary" type="button" id="reset">초기화</button></div>
+      <div id="form-error" class="error" role="alert" hidden></div><div class="form-actions"><button class="text-button" type="button" id="reset">기본 설정으로</button></div>
     </form><aside class="result-column" aria-label="계산 결과"><div id="result" aria-live="polite"><section class="card">확률표를 불러오는 중입니다…</section></div></aside><details class="card stages-card" id="stages" ${page === 'potential' ? 'hidden' : ''}><summary><span class="step">${page === 'starforce' ? '04' : '05'}</span> 단계별 상세 표</summary><p class="hint">스타포스만의 누적 기대 비용입니다. 파괴 후 재강화와 복구를 포함하며 잠재능력·시작 장비 구매비는 제외합니다.</p><div class="table-scroll"><table><thead><tr><th>강화 단계</th><th>단계별 비용</th><th>누적 비용</th><th>누적 평균 파괴</th><th>누적 평균 시도</th></tr></thead><tbody id="stage-rows"></tbody></table></div></details></div>`;
   syncItem();
   renderAdvanced();
   $('calculator').addEventListener('submit', e => { e.preventDefault(); compute(); });
   $('calculator').addEventListener('input', e => {
-    result = null;
-    const note = $('result-state');
-    if (note) note.textContent = '조건 변경됨 · 계산 버튼을 눌러 결과를 갱신하세요.';
+    if (e.target.type !== 'number') return;
+    if (e.target.id === 'purchase') saveEquipmentPrice();
+    for (const [attribute,key] of [['cost','costOverrides'],['recovery','recoveryFees']]) {
+      const star=e.target.dataset[attribute];
+      if (star === undefined) continue;
+      if (e.target.value.trim()==='') delete state[key][star];
+      else state[key][star]=Number(e.target.value);
+    }
+    compute();
   });
   $('calculator').addEventListener('change', e => {
     if (e.target.id === 'purchase') saveEquipmentPrice();
@@ -205,7 +211,7 @@ function form() {
     readForm(); renderAdvanced(); compute();
   }));
   document.querySelectorAll('[data-target]').forEach(b => b.addEventListener('click', () => { $('target').value = b.dataset.target; $('target').dispatchEvent(new Event('change',{bubbles:true})); }));
-  $('reset-price').addEventListener('click',()=>{delete priceOverrides[priceKey()];try {localStorage.setItem(priceStorageKey,JSON.stringify(priceOverrides));}catch{}loadEquipmentPrice();$('purchase').dispatchEvent(new Event('input',{bubbles:true}));syncItem();compute();});
+  $('reset-price').addEventListener('click',()=>{delete priceOverrides[priceKey()];try {localStorage.setItem(priceStorageKey,JSON.stringify(priceOverrides));}catch{}loadEquipmentPrice();syncItem();compute();});
   $('reset').addEventListener('click', () => { state = {...structuredClone(DEFAULTS),stat:'',recovery:'auto'}; loadEquipmentPrice(); form(); compute(); mountSimulation(()=>{result=null;compute();return result?structuredClone(state):null;},data,page); });
   $('clear-costs')?.addEventListener('click', () => { state.costOverrides = {}; renderAdvanced(); compute(); });
 }

@@ -2,7 +2,7 @@ import { ITEMS, PARTS, LEVELS, DEFAULTS, calculate, validate, attemptCost, starR
 import {equipmentIcon} from './icons.js';
 import {mountSimulation} from './simulation-ui.js';
 import {additionalThresholds} from './engine.js';
-import {EQUIPMENT_PRICES,defaultEquipmentPrice,PRICE_SOURCE,PRICE_DATE} from './equipment-prices.js';
+import {EQUIPMENT_PRICES,defaultEquipmentPrice} from './equipment-prices.js';
 
 const page = document.body.dataset.page;
 const $ = id => document.getElementById(id);
@@ -217,9 +217,8 @@ function readForm() {
   state.spare = state.purchase;
 }
 function syncItem() {
-  const custom=Object.hasOwn(priceOverrides,priceKey());
   const known=Object.hasOwn(EQUIPMENT_PRICES,state.item);
-  $('price-note').innerHTML=`${custom?'직접 입력한 가격 · ':''}${known?`<a href="${PRICE_SOURCE}" target="_blank" rel="noopener noreferrer">STARFORCE.GG 기본값</a> ${number(defaultEquipmentPrice(state.item))}억 · ${PRICE_DATE}`:'참고 사이트에 기본값 없음 · 가격을 입력해주세요.'}`;
+  $('price-note').textContent=known?'':'기본값 없음 · 가격을 입력해주세요.';
   if ($('additionalStat')) {
     const stats=additionalStats();
     if (!stats.some(([value])=>value===state.additionalStat)) state.additionalStat='';

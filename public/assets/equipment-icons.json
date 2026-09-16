@@ -1,0 +1,200 @@
+[
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-48px -120px",
+    "size": "120px 168px",
+    "label": "마이스터링"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "0px -48px",
+    "size": "120px 168px",
+    "label": "데브펜"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-96px -96px",
+    "size": "120px 168px",
+    "label": "골클벨"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-24px -144px",
+    "size": "120px 168px",
+    "label": "트왈마"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-72px -48px",
+    "size": "120px 168px",
+    "label": "도미"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "0px -144px",
+    "size": "120px 168px",
+    "label": "파풀마"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-72px -144px",
+    "size": "120px 168px",
+    "label": "분자벨"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-48px -96px",
+    "size": "120px 168px",
+    "label": "가엔링"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-96px -48px",
+    "size": "120px 168px",
+    "label": "에스텔라"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "0px -120px",
+    "size": "120px 168px",
+    "label": "루컨마"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-24px -120px",
+    "size": "120px 168px",
+    "label": "마깃안"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "0px 0px",
+    "size": "120px 168px",
+    "label": "고근"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-72px 0px",
+    "size": "120px 168px",
+    "label": "아케인 방어구"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "0px -24px",
+    "size": "120px 168px",
+    "label": "아케인 방어구"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-48px 0px",
+    "size": "120px 168px",
+    "label": "아케인 방어구"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-96px 0px",
+    "size": "120px 168px",
+    "label": "아케인 방어구"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-24px 0px",
+    "size": "120px 168px",
+    "label": "아케인 방어구"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-24px -24px",
+    "size": "120px 168px",
+    "label": "아스트라 보조무기"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-72px -120px",
+    "size": "120px 168px",
+    "label": "몽벨"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-72px -24px",
+    "size": "120px 168px",
+    "label": "커포"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-48px -24px",
+    "size": "120px 168px",
+    "label": "거공"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-96px -24px",
+    "size": "120px 168px",
+    "label": "언컨"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "0px -72px",
+    "size": "120px 168px",
+    "label": "에테 모상하견"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-24px -72px",
+    "size": "120px 168px",
+    "label": "에테 모상하견"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-48px -72px",
+    "size": "120px 168px",
+    "label": "에테 모상하견"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-72px -72px",
+    "size": "120px 168px",
+    "label": "에테 모상하견"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-96px -72px",
+    "size": "120px 168px",
+    "label": "에테 장신망"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-24px -96px",
+    "size": "120px 168px",
+    "label": "에테 장신망"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "0px -96px",
+    "size": "120px 168px",
+    "label": "에테 장신망"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-48px -144px",
+    "size": "120px 168px",
+    "label": "근원의 속삭임"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-24px -48px",
+    "size": "120px 168px",
+    "label": "죽음의 맹세"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-96px -120px",
+    "size": "120px 168px",
+    "label": "황홀한 악몽"
+  },
+  {
+    "bg": "url(\"https://www.boomback.com/equipments/sprite.png\")",
+    "position": "-48px -48px",
+    "size": "120px 168px",
+    "label": "데스티니 무기"
+  }
+]

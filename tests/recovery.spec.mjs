@@ -1,0 +1,25 @@
+import {test,expect} from '@playwright/test';
+test('automatic table calculates immediately and follows equipment level',async({page})=>{
+  await page.goto('/');
+  await expect(page.locator('#recovery')).toHaveValue('auto');
+  await expect(page.locator('.total')).toBeVisible();
+  await expect(page.locator('#recovery-result')).toContainText('자동 복구:');
+  await page.locator('#recovery-cost-details summary').click();
+  await expect(page.locator('[data-recovery="15"]')).toHaveAttribute('placeholder','148000000');
+  await page.locator('[data-item="papulatus"]').click();
+  await page.locator('#recovery-cost-details summary').click();
+  await expect(page.locator('[data-recovery="15"]')).toHaveAttribute('placeholder','165000000');
+  await page.locator('[data-item="dreamy"]').click();
+  await page.locator('#target').selectOption('25');
+  await expect(page.locator('.total')).toBeVisible();
+  await page.locator('#recovery').selectOption('preserve');
+  await page.locator('#recovery-cost-details summary').click();
+  await expect(page.locator('[data-recovery="22"]')).toHaveAttribute('placeholder','24200000000');
+  const before=await page.locator('.total').textContent();
+  await page.locator('[data-recovery="22"]').fill('0');
+  await page.locator('[data-recovery="22"]').dispatchEvent('change');
+  await expect(page.locator('.total')).not.toHaveText(before);
+  await page.locator('[data-recovery="22"]').fill('');
+  await page.locator('[data-recovery="22"]').dispatchEvent('change');
+  await expect(page.locator('.total')).toHaveText(before);
+});

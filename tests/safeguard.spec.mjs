@@ -1,0 +1,20 @@
+import {gotoReset} from './navigation.mjs';
+import {test,expect} from '@playwright/test';
+test('automatic safeguards follow equipment price and support manual override',async({page})=>{
+  await gotoReset(page,'/');
+  await expect(page.locator('#autoSafeguard')).toBeChecked();
+  await expect(page.locator('#guard-result')).toContainText('방지 안 함');
+  await page.locator('#purchase').fill('1000');
+  await page.locator('#purchase').dispatchEvent('change');
+  for(const star of [15,16,17]) await expect(page.locator(`[data-guard="${star}"]`)).toHaveAttribute('aria-pressed','true');
+  await expect(page.locator('#guard-result')).toContainText('8개 조합 비교');
+  await page.locator('[data-guard="17"]').click();
+  await expect(page.locator('#autoSafeguard')).not.toBeChecked();
+  await expect(page.locator('#guard-result')).toContainText('수동 선택');
+  await page.locator('#autoSafeguard').check();
+  await expect(page.locator('[data-guard="17"]')).toHaveAttribute('aria-pressed','true');
+  await page.locator('[data-event="shining-guarantee"]').click();
+  await expect(page.locator('[data-guard="15"]')).toHaveAttribute('aria-pressed','false');
+  await expect(page.locator('#guard-result')).toContainText('4개 조합 비교');
+  await page.reload();await expect(page.locator('#autoSafeguard')).toBeChecked();
+});

@@ -1,0 +1,126 @@
+{
+  "checkedAt": "2026-09-12",
+  "status": "third-party-reference-not-official",
+  "source": "https://sf.sfcalc.workers.dev/script.js",
+  "crossCheck": "https://www.boomback.com/ev",
+  "verifiedEntries": 48,
+  "missingFromCrossCheck": [
+    145
+  ],
+  "differences": [
+    {
+      "level": 140,
+      "star": 15,
+      "applied": 148000000,
+      "boomback": 149000000
+    },
+    {
+      "level": 140,
+      "star": 16,
+      "applied": 358000000,
+      "boomback": 359000000
+    },
+    {
+      "level": 140,
+      "star": 17,
+      "applied": 605000000,
+      "boomback": 606000000
+    },
+    {
+      "level": 150,
+      "star": 18,
+      "applied": 1690000000,
+      "boomback": 1689000000
+    },
+    {
+      "level": 150,
+      "star": 19,
+      "applied": 2810000000,
+      "boomback": 2803000000
+    },
+    {
+      "level": 150,
+      "star": 20,
+      "applied": 4950000000,
+      "boomback": 4944000000
+    },
+    {
+      "level": 150,
+      "star": 21,
+      "applied": 6230000000,
+      "boomback": 6224000000
+    },
+    {
+      "level": 150,
+      "star": 22,
+      "applied": 10200000000,
+      "boomback": 10179000000
+    },
+    {
+      "level": 160,
+      "star": 15,
+      "applied": 222000000,
+      "boomback": 220000000
+    },
+    {
+      "level": 160,
+      "star": 16,
+      "applied": 535000000,
+      "boomback": 534000000
+    },
+    {
+      "level": 160,
+      "star": 17,
+      "applied": 903000000,
+      "boomback": 901000000
+    },
+    {
+      "level": 160,
+      "star": 18,
+      "applied": 2050000000,
+      "boomback": 2040000000
+    },
+    {
+      "level": 160,
+      "star": 19,
+      "applied": 3410000000,
+      "boomback": 3380000000
+    },
+    {
+      "level": 160,
+      "star": 20,
+      "applied": 6000000000,
+      "boomback": 6010000000
+    },
+    {
+      "level": 160,
+      "star": 22,
+      "applied": 12400000000,
+      "boomback": 12300000000
+    },
+    {
+      "level": 250,
+      "star": 16,
+      "applied": 2040000000,
+      "boomback": 2050000000
+    },
+    {
+      "level": 250,
+      "star": 19,
+      "applied": 13000000000,
+      "boomback": 12900000000
+    },
+    {
+      "level": 250,
+      "star": 20,
+      "applied": 22900000000,
+      "boomback": 23000000000
+    },
+    {
+      "level": 250,
+      "star": 21,
+      "applied": 28800000000,
+      "boomback": 28900000000
+    }
+  ]
+}

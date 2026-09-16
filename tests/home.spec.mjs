@@ -22,7 +22,7 @@ test('all screenshot equipment is visible with icons and grouped armor changes p
 });
 test('no starforce target excludes enhancement and recovery and persists',async({page})=>{
   await page.goto('/?item=dreamy&stat=INT');
-  await page.locator('#target').selectOption('0');
+  await page.locator('[data-target="0"]').click();
   await page.locator('#calculation-details>summary').click();
   await expect(page.locator('#upgrade-cost')).toBeVisible();
   for (const name of ['스타포스 강화','파괴 복구 · 스페어']) {
@@ -36,7 +36,7 @@ test('no starforce target excludes enhancement and recovery and persists',async(
   await page.locator('#purchase').fill('5');
   await page.locator('#purchase').dispatchEvent('change');
   await expect(page.locator('.raw-total')).toContainText('500,000,000 메소');
-  await page.locator('#target').selectOption('22');
+  await page.locator('[data-target="22"]').click();
   await expect(page.locator('.goal-tags')).toContainText('22성');
   await expect(page.locator('.breakdown>div').filter({hasText:'스타포스 강화'}).locator('dd')).not.toHaveText('0 메소');
 });
@@ -50,9 +50,9 @@ test('entry opens meister calculator with target selection',async({page})=>{
   await expect(page.locator('#stat option')).toHaveText(['선택 없음','주스탯%','올스탯%']);
   await expect(page.locator('#threshold option')).toHaveText(['27% 이상','30% 이상','33% 이상','36% 이상','39% 이상']);
   await expect(page.locator('#start, #start-range')).toHaveCount(0);
-  await expect(page.locator('#target option')).toHaveText(['선택 없음','18성','19성','20성','21성','22성','23성','24성','25성']);
+  await expect(page.locator('[data-target]')).toHaveText(['선택 없음','18성','19성','20성','21성','22성','23성','24성','25성']);
   await expect(page.locator('#target-range')).toHaveCount(0);
-  await page.locator('#target').selectOption('25');
+  await page.locator('[data-target="25"]').click();
   await expect(page.locator('#target')).toHaveValue('25');
   await expect(page.locator('.goal-tags')).toContainText('25성');
   await expect(page.locator('.total')).not.toContainText('NaN');

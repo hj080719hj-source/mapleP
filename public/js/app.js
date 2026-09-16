@@ -2,6 +2,7 @@ import { ITEMS, PARTS, LEVELS, DEFAULTS, calculate, validate, attemptCost, starR
 import {equipmentIcon} from './icons.js';
 import {mountSimulation} from './simulation-ui.js';
 import {additionalThresholds} from './engine.js';
+import {EQUIPMENT_PRICES,defaultEquipmentPrice,PRICE_SOURCE,PRICE_DATE} from './equipment-prices.js';
 
 const page = document.body.dataset.page;
 const $ = id => document.getElementById(id);
@@ -9,6 +10,25 @@ const esc = text => String(text).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const number = (n, digits = 2) => n.toLocaleString('ko-KR', { maximumFractionDigits: digits });
 const money = n => n >= 1e8 ? `${number(n / 1e8)}억` : n >= 1e4 ? `${number(n / 1e4)}만` : number(n, 0);
 const storageKey = 'maple-lab:v1';
+const priceStorageKey='maple-you:equipment-prices:v1';
+let priceOverrides={};
+try {
+  const saved=JSON.parse(localStorage.getItem(priceStorageKey) || '{}');
+  priceOverrides=Object.fromEntries(Object.entries(saved).filter(([key,value])=>/^[a-z-]+:\d+$/.test(key) && Number.isFinite(value) && value>=0 && value<=100000));
+} catch { /* Optional storage. */ }
+const priceKey=()=>`${state.item}:${state.part}`;
+function loadEquipmentPrice() {
+  state.purchase=priceOverrides[priceKey()] ?? defaultEquipmentPrice(state.item);
+  state.spare=state.purchase;
+  if ($('purchase')) $('purchase').value=state.purchase;
+}
+function saveEquipmentPrice() {
+  const value=Number($('purchase').value);
+  if ($('purchase').value.trim() && Number.isFinite(value) && value>=0 && value<=100000) {
+    priceOverrides[priceKey()]=value;
+    try { localStorage.setItem(priceStorageKey,JSON.stringify(priceOverrides)); } catch { /* Optional storage. */ }
+  }
+}
 let data;
 let result;
 let state = {...structuredClone(DEFAULTS), stat:'', recovery:'auto'};
@@ -33,6 +53,7 @@ if (requestedItem) {
   try {validate(candidate);state=candidate;} catch { /* Invalid optional URL values are ignored. */ }
 }
 
+loadEquipmentPrice();
 if (['reset','preserve','auto'].includes(query.get('recovery'))) state.recovery=query.get('recovery');
 state.start = 0;
 state.target = state.target === 0 ? 0 : Math.max(18,Math.min(25,state.target));
@@ -98,9 +119,10 @@ function form() {
       <section class="card potential-card goal-card"><div class="section-heading"><span class="step">02</span><h2>목표 설정</h2>${page !== 'potential' ? `<span class="star-label">★ <span id="star-label">${state.target}</span></span>` : '<span class="pill">시작 등급 선택 가능</span>'}</div>
       <div class="goal-fields ${page}">
       ${field('장비 1개 가격 (억 메소)', 'purchase', input('purchase', 0, 100000, '0.01'))}
+      <div class="price-source"><span id="price-note"></span><button type="button" class="text-button" id="reset-price">기본 가격으로</button></div>
       ${page !== 'starforce' ? `${field('목표 잠재', 'stat', select('stat', targetStats()))}${field(`목표 합계 (${targetUnit()}) 이상`, 'threshold', select('threshold', targetThresholds().map(n=>[n,`${n}${targetUnit()} 이상`])) )}` : ''}
       ${page !== 'starforce' ? `${field('목표 에디셔널','additionalStat',select('additionalStat',additionalStats()))}${field('에디셔널 합계 (%) 이상','additionalThreshold',select('additionalThreshold',additionalThresholds(state,data.additional).map(n=>[n,`${n}${additionalUnit()} 이상`])))}<p class="hint additional-hint">에디셔널은 별도 레전드리 목표입니다. 주스탯에는 올스탯%를 포함하며, 고정 스탯·9레벨당 스탯은 %로 환산하지 않습니다. 일반 잠재도 주스탯이면 같은 스탯을 맞추는 순서로 계산합니다.</p>` : ''}
-      ${page !== 'potential' ? field('목표 스타포스', 'target', select('target', [[0,'선택 없음'],...Array.from({length:8}, (_,i) => [i+18,`${i+18}성`])]), '선택 없음이면 스타포스 강화·복구 비용을 제외합니다.') : ''}
+      ${page !== 'potential' ? `<div class="star-target-field"><span id="star-target-title">목표 스타포스</span><input type="hidden" id="target" value="${state.target}"><div class="chips star-target-buttons" role="group" aria-labelledby="star-target-title">${[0,18,19,20,21,22,23,24,25].map(n=>`<button type="button" data-target="${n}" aria-pressed="${state.target===n}">${n?`${n}성`:'선택 없음'}</button>`).join('')}</div><p class="hint">선택 없음이면 스타포스 강화·복구 비용을 제외합니다.</p></div>` : ''}
       </div>
       <p class="hint">장비 가격은 최초 장비와 스페어에 공통 적용합니다. 0이면 장비 구매비를 제외합니다.</p>
       ${page !== 'starforce' ? '<p class="notice" id="potential-rule"></p>' : ''}
@@ -129,9 +151,11 @@ function form() {
     if (note) note.textContent = '조건 변경됨 · 계산 버튼을 눌러 결과를 갱신하세요.';
   });
   $('calculator').addEventListener('change', e => {
+    if (e.target.id === 'purchase') saveEquipmentPrice();
     if (e.target.id === 'item') {
       const item = ITEMS.find(i => i.id === $('item').value);
       if (item) { $('level').value = item.level; $('part').value = item.part; }
+      state.item=$('item').value;state.part=Number($('part').value);loadEquipmentPrice();
       state.costOverrides = {}; state.recoveryFees = {};
     }
     if (e.target.id === 'level') { state.costOverrides = {}; state.recoveryFees = {}; }
@@ -150,7 +174,7 @@ function form() {
   });
   $('group-parts').addEventListener('click',e=>{
     const button=e.target.closest('[data-part]');if(!button)return;
-    $('part').value=button.dataset.part;readForm();syncItem();compute();
+    $('part').value=button.dataset.part;readForm();loadEquipmentPrice();syncItem();compute();
   });
   document.querySelectorAll('[data-item]').forEach(b=>b.addEventListener('click',()=>{
     $('item').value = b.dataset.item;
@@ -175,8 +199,9 @@ function form() {
     $('safeguard').checked = state.safeguardStages.length === 3;
     readForm(); renderAdvanced(); compute();
   }));
-  document.querySelectorAll('[data-target]').forEach(b => b.addEventListener('click', () => { $('target').value = b.dataset.target; readForm(); renderAdvanced(); compute(); }));
-  $('reset').addEventListener('click', () => { state = {...structuredClone(DEFAULTS),stat:'',recovery:'auto'}; form(); compute(); });
+  document.querySelectorAll('[data-target]').forEach(b => b.addEventListener('click', () => { $('target').value = b.dataset.target; $('target').dispatchEvent(new Event('change',{bubbles:true})); }));
+  $('reset-price').addEventListener('click',()=>{delete priceOverrides[priceKey()];try {localStorage.setItem(priceStorageKey,JSON.stringify(priceOverrides));}catch{}loadEquipmentPrice();$('purchase').dispatchEvent(new Event('input',{bubbles:true}));syncItem();compute();});
+  $('reset').addEventListener('click', () => { state = {...structuredClone(DEFAULTS),stat:'',recovery:'auto'}; loadEquipmentPrice(); form(); compute(); mountSimulation(()=>{result=null;compute();return result?structuredClone(state):null;},data,page); });
   $('clear-costs')?.addEventListener('click', () => { state.costOverrides = {}; renderAdvanced(); compute(); });
 }
 function readForm() {
@@ -192,6 +217,9 @@ function readForm() {
   state.spare = state.purchase;
 }
 function syncItem() {
+  const custom=Object.hasOwn(priceOverrides,priceKey());
+  const known=Object.hasOwn(EQUIPMENT_PRICES,state.item);
+  $('price-note').innerHTML=`${custom?'직접 입력한 가격 · ':''}${known?`<a href="${PRICE_SOURCE}" target="_blank" rel="noopener noreferrer">STARFORCE.GG 기본값</a> ${number(defaultEquipmentPrice(state.item))}억 · ${PRICE_DATE}`:'참고 사이트에 기본값 없음 · 가격을 입력해주세요.'}`;
   if ($('additionalStat')) {
     const stats=additionalStats();
     if (!stats.some(([value])=>value===state.additionalStat)) state.additionalStat='';
@@ -229,6 +257,7 @@ function activeStars() {
 function renderAdvanced() {
   if (!$('cost-fields')) return;
   $('star-label').textContent = state.target === 0 ? '선택 없음' : state.target;
+  document.querySelectorAll('[data-target]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.target)===state.target)));
   document.querySelectorAll('[data-mvp]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.mvp)===state.mvp)));
   document.querySelectorAll('[data-guard]').forEach(b=>{b.disabled=state.guarantee && Number(b.dataset.guard)===15; b.setAttribute('aria-pressed',String(isSafeguarded(Number(b.dataset.guard),state)));});
   const preset = !state.discount && !state.destroyDiscount && !state.guarantee && !state.recoveryDiscount ? 'none'

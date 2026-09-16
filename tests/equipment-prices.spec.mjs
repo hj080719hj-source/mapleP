@@ -1,0 +1,28 @@
+import {test,expect} from '@playwright/test';
+test('reference prices follow equipment and preserve manual zero per item',async({page})=>{
+  await page.goto('/?item=meister');
+  await expect(page.locator('#purchase')).toHaveValue('0.8');
+  await page.locator('[data-item="dreamy"]').click();
+  await expect(page.locator('#purchase')).toHaveValue('40');
+  await page.locator('#purchase').fill('0');
+  await page.locator('#purchase').dispatchEvent('change');
+  await page.locator('[data-item="terror"]').click();
+  await expect(page.locator('#purchase')).toHaveValue('50');
+  await page.locator('[data-item="dreamy"]').click();
+  await expect(page.locator('#purchase')).toHaveValue('0');
+  await page.reload();
+  await page.locator('[data-item="dreamy"]').click();
+  await expect(page.locator('#purchase')).toHaveValue('0');
+  await page.locator('#reset-price').click();
+  await expect(page.locator('#purchase')).toHaveValue('40');
+  await page.locator('[data-target="0"]').click();
+  await expect(page.locator('[data-target="0"]')).toHaveAttribute('aria-pressed','true');
+  await expect(page.locator('.total')).toContainText('40억');
+  await page.locator('[data-target="25"]').click();
+  await expect(page.locator('[data-target="25"]')).toHaveAttribute('aria-pressed','true');
+  await expect(page.locator('[data-target="0"]')).toHaveAttribute('aria-pressed','false');
+  await expect(page.locator('#star-label')).toHaveText('25');
+  await page.locator('[data-item="clover"]').click();
+  await expect(page.locator('#purchase')).toHaveValue('0');
+  await expect(page.locator('#price-note')).toContainText('기본값 없음');
+});

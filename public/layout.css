@@ -1,4 +1,7 @@
 /* Compact input workspace and persistent cost summary. */
+.price-source{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:-8px;color:var(--muted);font-size:10px;line-height:1.7}
+.price-source a{text-decoration:underline;text-underline-offset:3px}.price-source .text-button{padding:0;margin-left:auto;white-space:nowrap}
+.star-target-field{grid-column:1/-1;font-size:11px;color:#b0a393}.star-target-buttons{margin-top:9px;gap:7px}.star-target-buttons button{min-width:47px;min-height:40px;font-size:12px;padding:9px 12px}
 .additional-hint{grid-column:1/-1;margin:0}.additional-settings{min-width:0}.additional-settings .field{max-width:280px}
 .additional-settings .miracle-chip{display:flex;width:fit-content}.teal{background:#63d3c2}.pink{background:#ee8faf}
 main,footer{max-width:1400px;margin-left:auto;margin-right:auto;padding-left:28px;padding-right:28px}

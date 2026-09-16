@@ -13,7 +13,7 @@ test('default example, live updates, errors and page persistence', async ({page}
   await page.locator('#purchase').fill('5');
   await page.getByRole('button',{name:'기대 비용 계산하기'}).click();
   await expect(page.locator('.total')).not.toHaveText(before);
-  await page.locator('#target').selectOption('18');
+  await page.locator('[data-target="18"]').click();
   await expect(page.locator('.total')).not.toHaveText(before);
   await gotoReset(page,'/potential.html');
 
@@ -54,8 +54,11 @@ test('reference-style equipment buttons, sliders, events and detailed table stay
   await page.getByRole('button',{name:'마이스터링',exact:true}).click();
   await expect(page.locator('.result-card h2')).toHaveText('마이스터링');
   await expect(page.locator('[data-item="meister"]')).toHaveAttribute('aria-pressed','true');
+  // Compare the star-only table with the total without initial purchase cost.
+  await page.locator('#purchase').fill('0');
+  await page.locator('#purchase').dispatchEvent('change');
   await expect(page.locator('#start-range, #start')).toHaveCount(0);
-  await page.locator('#target').selectOption('18');
+  await page.locator('[data-target="18"]').click();
   await expect(page.locator('#target')).toHaveValue('18');
   const before = await page.locator('.total').textContent();
   await page.getByRole('button',{name:'샤이닝',exact:true}).click();

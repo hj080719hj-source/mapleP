@@ -2,7 +2,7 @@ import {test,expect} from '@playwright/test';
 test('additional-only selection, grades, miracle, equipment filtering and persistence',async({page})=>{
   await page.goto('/?item=dreamy');
   await expect(page.locator('#additionalStat')).toHaveValue('');
-  await page.locator('#target').selectOption('0');
+  await page.locator('[data-target="0"]').click();
   await page.locator('#additionalStat').selectOption('주스탯');
   await expect(page.locator('.goal-tags')).toContainText('에디셔널 주스탯');
   await page.locator('#calculation-details>summary').click();

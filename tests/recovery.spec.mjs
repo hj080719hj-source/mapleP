@@ -10,7 +10,7 @@ test('automatic table calculates immediately and follows equipment level',async(
   await page.locator('#recovery-cost-details summary').click();
   await expect(page.locator('[data-recovery="15"]')).toHaveAttribute('placeholder','165000000');
   await page.locator('[data-item="dreamy"]').click();
-  await page.locator('#target').selectOption('25');
+  await page.locator('[data-target="25"]').click();
   await expect(page.locator('.total')).toBeVisible();
   await page.locator('#recovery').selectOption('preserve');
   await page.locator('#recovery-cost-details summary').click();

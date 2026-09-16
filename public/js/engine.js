@@ -14,7 +14,7 @@ export const DEFAULTS = { item: 'dreamy', level: 200, part: 13, stat: 'INT', thr
   discount: false, destroyDiscount: false, safeguard: true, recovery: 'reset',
   costOverrides: {}, recoveryFees: {}, mvp: 0, pcBang: false, guarantee: false,
   recoveryDiscount: false, safeguardStages: null, miracle: false, autoSafeguard: true, recoveryVersion: 1, potentialGrade: 'epic',
-  additionalStat:'', additionalThreshold:14, additionalGrade:'epic', additionalMiracle:false };
+  additionalStat:'', additionalThreshold:14, additionalGrade:'epic' };
 
 function finiteRange(value, min, max, name, integer = false) {
   if (!Number.isFinite(value) || value < min || value > max || (integer && !Number.isInteger(value)))
@@ -29,8 +29,8 @@ export function validate(s) {
   if (!PARTS[s.part]) throw new Error('지원 장비 부위를 선택해주세요.');
   if (!['', '주스탯', '올스탯', 'STR', 'DEX', 'INT', 'LUK','공격력','마력','쿨타임 감소','크리티컬 데미지'].includes(s.stat)) throw new Error('목표 스탯을 선택해주세요.');
   finiteRange(s.threshold, s.stat === '쿨타임 감소' ? 1 : s.stat === '크리티컬 데미지' ? 8 : 9, s.stat === '쿨타임 감소' ? 6 : s.stat === '크리티컬 데미지' ? 24 : 39, '목표 옵션', true);
-  finiteRange(s.start, 0, 25, '현재 스타포스', true);
-  finiteRange(s.target, s.start, 25, '목표 스타포스', true);
+  finiteRange(s.start, 0, 27, '현재 스타포스', true);
+  finiteRange(s.target, s.start, 27, '목표 스타포스', true);
   finiteRange(s.spare, 0, 100000, '스페어 가격');
   finiteRange(s.purchase, 0, 100000, '시작 장비 구매비');
   if (!['reset', 'preserve','auto'].includes(s.recovery)) throw new Error('복구 방식을 선택해주세요.');
@@ -125,7 +125,7 @@ export function matchesPotentialGoal(names, s) {
 }
 export function additionalSettings(s) {
   return {...s, stat:s.additionalStat, threshold:s.additionalThreshold, potentialGrade:s.additionalGrade ?? 'epic',
-    miracle:s.additionalMiracle ?? false, achieved:false, allStat:true,
+    miracle:s.miracle ?? false, achieved:false, allStat:true,
     singleMainStat:['주스탯','STR','DEX','INT','LUK'].includes(s.stat)};
 }
 export function additionalThresholds(s, data) {
@@ -156,11 +156,11 @@ export function potentialExpectation(s, data, additional = false) {
     median: quantile(.5), p90: quantile(.9) };
 }
 
-const BASE_SUCCESS = [.95,.9,.85,.85,.8,.75,.7,.65,.6,.55,.5,.45,.4,.35,.3,.3,.3,.15,.15,.15,.3,.15,.15,.1,.1];
-const BASE_DESTROY = Array(15).fill(0).concat([.021,.021,.068,.068,.085,.105,.1275,.17,.18,.18]);
+const BASE_SUCCESS = [.95,.9,.85,.85,.8,.75,.7,.65,.6,.55,.5,.45,.4,.35,.3,.3,.3,.15,.15,.15,.3,.15,.15,.1,.1,.1,.07];
+const BASE_DESTROY = Array(15).fill(0).concat([.021,.021,.068,.068,.085,.105,.1275,.17,.18,.18,.18,.186]);
 // Planning formula, not a Nexon-published cost table. UI allows exact in-game costs.
 export function estimatedStarCost(level, star) {
-  const divisor = [571, 314, 214, 157, 107, 200, 200, 150, 70, 45, 200, 125, 200, 200, 200][star - 10];
+  const divisor = [571, 314, 214, 157, 107, 200, 200, 150, 70, 45, 200, 125, 200, 200, 200, 200, 200][star - 10];
   const raw = star < 10 ? level ** 3 * (star + 1) / 36 : level ** 3 * (star + 1) ** 2.7 / divisor;
   return Math.round((1000 + raw) / 100) * 100;
 }

@@ -36,7 +36,7 @@ test('additional-only costs, start grades, shared targeting and total remain con
   const legend=calculate({...settings,additionalGrade:'legendary'},data).additional;
   assert.equal(legend.upgrade.cost,0);
   assert.ok(Math.abs(legend.attempts-alone.additional.attempts-1)<1e-8);
-  const miracle=calculate({...settings,additionalMiracle:true},data).additional;
+  const miracle=calculate({...settings,miracle:true},data).additional;
   assert.equal(miracle.optionCost,alone.additional.optionCost);
   assert.ok(miracle.upgrade.cost<alone.additional.upgrade.cost);
   assert.equal(calculate({...settings,additionalStat:''},data).additional,null);

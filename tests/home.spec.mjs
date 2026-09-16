@@ -50,7 +50,7 @@ test('entry opens meister calculator with target selection',async({page})=>{
   await expect(page.locator('#stat option')).toHaveText(['선택 없음','주스탯%','올스탯%']);
   await expect(page.locator('#threshold option')).toHaveText(['27% 이상','30% 이상','33% 이상','36% 이상','39% 이상']);
   await expect(page.locator('#start, #start-range')).toHaveCount(0);
-  await expect(page.locator('[data-target]')).toHaveText(['선택 없음','18성','19성','20성','21성','22성','23성','24성','25성']);
+  await expect(page.locator('[data-target]')).toHaveText(['선택 없음',...Array.from({length:11},(_,i)=>`${i+17}성`)]);
   await expect(page.locator('#target-range')).toHaveCount(0);
   await page.locator('[data-target="25"]').click();
   await expect(page.locator('#target')).toHaveValue('25');

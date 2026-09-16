@@ -6,6 +6,7 @@ test('additional-only selection, grades, miracle, equipment filtering and persis
   await page.locator('#additionalStat').selectOption('주스탯');
   await expect(page.locator('.goal-tags')).toContainText('에디셔널 주스탯');
   await page.locator('#calculation-details>summary').click();
+  await page.locator('#additionalMiracle').uncheck();
   const before=await page.locator('#additional-upgrade-cost').textContent();
   await page.locator('#additionalMiracle').check();
   await expect(page.locator('#additional-upgrade-cost')).not.toHaveText(before);

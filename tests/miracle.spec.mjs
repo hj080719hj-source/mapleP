@@ -21,6 +21,7 @@ test('starting potential grade changes remaining upgrade costs and persists',asy
 });
 test('miracle changes grade costs, keeps option cost and persists',async({page})=>{
   await gotoReset(page,'/?item=dreamy&stat=INT&threshold=27');
+  await page.locator('#miracle').uncheck();
   await expect(page.locator('#upgrade-detail')).toContainText('3.5%');
   const normal=await page.locator('#upgrade-cost').textContent();
   const optionCost=await page.locator('.breakdown>div').filter({hasText:'잠재 옵션 재설정'}).textContent();

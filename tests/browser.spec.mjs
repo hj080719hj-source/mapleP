@@ -8,6 +8,7 @@ test('default example, live updates, errors and page persistence', async ({page}
   await expect(page.locator('.result-card h2')).toHaveText('몽환의 벨트');
   await expect(page.locator('.total')).not.toContainText('NaN');
   await expect(page.locator('.goal-tags')).toContainText('잠재 선택 없음');
+  await page.locator('[data-event="none"]').click();
   const before = await page.locator('.total').textContent();
   await expect(page.locator('#spare, .equipment-custom')).toHaveCount(0);
   await page.locator('#purchase').fill('5');
@@ -22,6 +23,7 @@ test('default example, live updates, errors and page persistence', async ({page}
   await gotoReset(page,'/starforce.html');
   await expect(page.locator('#stat')).toHaveCount(0);
   await expect(page.locator('#target')).toHaveValue('18');
+  await page.locator('[data-event="none"]').click();
   await gotoReset(page,'/guide.html');
   await expect(page.getByRole('heading',{name:'지원 범위'})).toBeVisible();
   expect(errors).toEqual([]);
@@ -61,9 +63,11 @@ test('reference-style equipment buttons, sliders, events and detailed table stay
   await page.locator('[data-target="18"]').click();
   await expect(page.locator('#target')).toHaveValue('18');
   const before = await page.locator('.total').textContent();
+  await page.getByRole('button',{name:'이벤트 없음',exact:true}).click();
+  await expect(page.locator('.total')).not.toHaveText(before);
   await page.getByRole('button',{name:'샤이닝',exact:true}).click();
   await expect(page.locator('[data-event="shining"]')).toHaveAttribute('aria-pressed','true');
-  await expect(page.locator('.total')).not.toHaveText(before);
+  await expect(page.locator('.total')).toHaveText(before);
   await page.getByRole('button',{name:'다이아 이상 10%'}).click();
   await expect(page.locator('[data-mvp="0.1"]')).toHaveAttribute('aria-pressed','true');
   await page.getByRole('checkbox',{name:'5% 추가 할인'}).check();

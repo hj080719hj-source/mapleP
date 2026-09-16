@@ -1,0 +1,21 @@
+import {test,expect} from '@playwright/test';
+test('new defaults apply once to saved settings and later edits persist',async({page})=>{
+  await page.goto('/');
+  await page.evaluate(()=>localStorage.setItem('maple-lab:v1',JSON.stringify({item:'dreamy',level:200,part:13,stat:'',threshold:27,target:22,miracle:false,additionalMiracle:false,additionalGrade:'epic',mvp:0,pcBang:false,discount:false,destroyDiscount:false,recoveryDiscount:false,autoSafeguard:false})));
+  await page.reload();
+  for(const id of ['miracle','additionalMiracle','pcBang','autoSafeguard'])await expect(page.locator('#'+id)).toBeChecked();
+  await expect(page.locator('#additionalGrade')).toHaveValue('rare');
+  await expect(page.locator('[data-event="shining"]')).toHaveAttribute('aria-pressed','true');
+  await expect(page.locator('[data-mvp="0.1"]')).toHaveAttribute('aria-pressed','true');
+  await expect(page.locator('.potential-events #miracle')).toHaveCount(1);
+  await expect(page.locator('.potential-events #additionalMiracle')).toHaveCount(1);
+  await page.locator('#miracle').uncheck();
+  await page.locator('#pcBang').uncheck();
+  await page.reload();
+  await expect(page.locator('#miracle')).not.toBeChecked();
+  await expect(page.locator('#pcBang')).not.toBeChecked();
+  await page.locator('#reset').click();
+  await expect(page.locator('#miracle')).toBeChecked();
+  await expect(page.locator('#pcBang')).toBeChecked();
+  await expect(page.locator('#additionalGrade')).toHaveValue('rare');
+});

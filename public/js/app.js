@@ -1,4 +1,4 @@
-import { ITEMS, PARTS, LEVELS, DEFAULTS, calculate, validate, attemptCost, starRates, reachableStars, isSafeguarded, stageBreakdown, optimizeSafeguard, recoveryTableCost, acceptsAnyMainStat } from './engine.js';
+import { ITEMS, PARTS, LEVELS, DEFAULTS as ENGINE_DEFAULTS, calculate, validate, attemptCost, starRates, reachableStars, isSafeguarded, stageBreakdown, optimizeSafeguard, recoveryTableCost, acceptsAnyMainStat } from './engine.js';
 import {equipmentIcon} from './icons.js';
 import {mountSimulation} from './simulation-ui.js';
 import {additionalThresholds} from './engine.js';
@@ -10,6 +10,8 @@ const esc = text => String(text).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const number = (n, digits = 2) => n.toLocaleString('ko-KR', { maximumFractionDigits: digits });
 const money = n => n >= 1e8 ? `${number(n / 1e8)}억` : n >= 1e4 ? `${number(n / 1e4)}만` : number(n, 0);
 const storageKey = 'maple-lab:v1';
+const optionDefaults={miracle:true,additionalMiracle:true,additionalGrade:'rare',discount:true,destroyDiscount:true,recoveryDiscount:true,guarantee:false,mvp:.1,pcBang:true,autoSafeguard:true,safeguardStages:null,optionsVersion:1};
+const DEFAULTS={...ENGINE_DEFAULTS,...optionDefaults};
 const priceStorageKey='maple-you:equipment-prices:v1';
 let priceOverrides={};
 try {
@@ -38,6 +40,7 @@ try {
   if (saved) {
     const merged = { ...state, ...Object.fromEntries(Object.entries(saved).filter(([k]) => k in DEFAULTS)) };
     if (!saved.recoveryVersion) merged.recovery='auto';
+    if (!saved.optionsVersion) Object.assign(merged,optionDefaults);
     validate(merged);
     state = merged;
   }
@@ -89,8 +92,9 @@ const field = (label, id, control, hint = '') => `<label class="field" for="${id
 const input = (id, min, max, step = '1') => `<input id="${id}" type="number" min="${min}" max="${max}" step="${step}" value="${state[id]}" required>`;
 const select = (id, list) => `<select id="${id}">${options(list, state[id])}</select>`;
 const gradeLabels = {rare:'레어',epic:'에픽',unique:'유니크',legendary:'레전드리'};
-const potentialStart = () => field('시작 등급','potentialGrade',select('potentialGrade',Object.entries(gradeLabels))) + `<span class="miracle-chip">${checkbox('miracle','미라클타임 적용')}</span><p class="hint">선택한 등급부터 등업 비용 포함 · 레전드리는 옵션 재설정 비용만 계산</p>`;
-const additionalStart = () => `<div class="additional-settings">${field('에디셔널 시작 등급','additionalGrade',select('additionalGrade',Object.entries(gradeLabels)))}<span class="miracle-chip">${checkbox('additionalMiracle','에디셔널 미라클타임 적용')}</span><p class="hint">레전드리 목표 · 천장 누적 0회 · 메소 재설정 기준</p></div>`;
+const potentialStart = () => field('시작 등급','potentialGrade',select('potentialGrade',Object.entries(gradeLabels))) + `<p class="hint">선택한 등급부터 등업 비용 포함 · 레전드리는 옵션 재설정 비용만 계산</p>`;
+const additionalStart = () => `<div class="additional-settings">${field('에디셔널 시작 등급','additionalGrade',select('additionalGrade',Object.entries(gradeLabels)))}<p class="hint">레전드리 목표 · 천장 누적 0회 · 메소 재설정 기준</p></div>`;
+const potentialEvents = () => `<div class="option-row potential-events"><strong>잠재능력 이벤트</strong><div class="potential-event-choices"><span class="miracle-chip">${checkbox('miracle','미라클타임 적용')}</span><span class="miracle-chip">${checkbox('additionalMiracle','에디셔널 미라클타임 적용')}</span><p class="hint">등업 확률 2배 · 옵션 확률과 천장 횟수는 동일</p></div></div>`;
 function additionalDetail(r) {
   if (!r) return '';
   return `<section class="card detail-card" id="additional-detail"><h3>에디셔널 · ${esc(state.additionalStat)} ${state.additionalThreshold}${additionalUnit()} 이상</h3><p class="hint">${gradeLabels[state.additionalGrade]} 시작 · ${state.additionalMiracle?'미라클 적용':'일반 등업'} · ${r.anyMainStat?'공용 장비의 주스탯 중 하나':'주스탯 선택 시 한 스탯 기준'}</p><dl class="metrics">
@@ -127,10 +131,11 @@ function form() {
       <p class="hint">장비 가격은 최초 장비와 스페어에 공통 적용합니다. 0이면 장비 구매비를 제외합니다.</p>
       ${page !== 'starforce' ? '<p class="notice" id="potential-rule"></p>' : ''}
       <p class="hint">${page !== 'starforce' ? '잠재: 선택한 시작 등급부터 등업 포함 · 선택 없음이면 비용 제외 · 천장 누적 0회 · 에디셔널 별도 선택' : ''}${page === 'combined' ? '<br>' : ''}${page !== 'potential' ? '스타포스: 0성부터 목표까지 강화·파괴 복구 비용 포함' : ''}</p>
-      ${page === 'potential' ? `<details class="potential-settings" open><summary>상세 옵션 · 잠재능력</summary>${potentialStart()}${additionalStart()}</details>` : ''}</section>
+      ${page === 'potential' ? `<details class="potential-settings" open><summary>상세 옵션 · 잠재능력</summary>${potentialStart()}${additionalStart()}${potentialEvents()}</details>` : ''}</section>
       ${page !== 'potential' ? `<details class="card option-card" open><summary><span class="step">03</span> 상세 옵션 <span class="summary-hint">이벤트 · 할인 · 파괴 방지 · 복구</span></summary>
       <div class="option-row"><strong>잠재능력</strong><div>${potentialStart()}</div></div>
       ${page !== 'starforce' ? `<div class="option-row"><strong>에디셔널</strong>${additionalStart()}</div>` : ''}
+      ${page !== 'starforce' ? potentialEvents() : ''}
       <div class="option-row"><strong>스타포스 이벤트</strong><div class="chips" id="event-presets">${[['none','이벤트 없음'],['cost','30% 할인'],['destroy','30% 파괴 감소'],['shining','샤이닝'],['shining-guarantee','샤이닝 + 5·10·15성 확정']].map(([id,label])=>`<button type="button" data-event="${id}">${label}</button>`).join('')}<p class="hint" id="event-description"></p></div></div>
       <div class="option-row"><strong>MVP 할인</strong><div class="chips">${[[0,'없음 · 브론즈'],[.03,'실버 3%'],[.05,'골드 5%'],[.1,'다이아 이상 10%']].map(([value,label])=>`<button type="button" data-mvp="${value}">${label}</button>`).join('')}</div></div>
       <div class="option-row"><strong>PC방</strong>${checkbox('pcBang','5% 추가 할인','0→1성부터 16→17성까지 MVP와 합산 적용')}</div>

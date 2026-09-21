@@ -4,6 +4,7 @@ export const GRADES = ['rare','epic','unique','legendary'];
 export const GRADE_NAMES = ['레어','에픽','유니크','레전드리'];
 // Nexon: Guide/OtherProbability/cube/artisan. Gold cubes have no mesos-reroll pity.
 export const GOLD_RATES = [.079994,.016959,.001996];
+export const SILVER_RATES = [.047619,.011858];
 export function lootProbability(lines,dropGoal,mesoGoal=0) {
   if(!Array.isArray(lines)||lines.length!==3)throw new Error('드메 확률표를 불러오지 못했습니다.');
   function visit(index,drop,meso,seen) {
@@ -59,17 +60,40 @@ export function mitraCombinationProbability(lines,stat,threeLineThreshold,twoLin
   }
   return probability;
 }
-export function compareGradeUp({level=140,start='epic',target='legendary',miracle=true}={}) {
+export function compareGradeUp({level=140,start='epic',target='legendary',miracle=true,cube='gold'}={}) {
   const from=GRADES.indexOf(start), to=GRADES.indexOf(target);
   if (![90,140,145,150,160,200].includes(level)) throw new Error('200제 이하 지원 장비를 선택해주세요.');
   if (from<0 || to<0 || from>to) throw new Error('목표 등급은 시작 등급 이상이어야 합니다.');
+  if(!['gold','silver'].includes(cube))throw new Error('큐브를 선택해주세요.');
+  if(cube==='silver'&&(from>2||to>2))throw new Error('실버 큐브는 유니크 등급까지만 사용할 수 있습니다.');
   const mesos=gradeUpExpectation(level,miracle,start).rows.slice(0,to-from);
   const rows=mesos.map((row,i)=>{
-    const probability=GOLD_RATES[from+i]*(miracle?2:1), attempts=1/probability;
+    const probability=(cube==='silver'?SILVER_RATES:GOLD_RATES)[from+i]*(miracle?2:1), attempts=1/probability;
     return {name:row.name,probability,attempts,mesosCost:row.cost};
   });
   const attempts=rows.reduce((a,r)=>a+r.attempts,0), mesosCost=rows.reduce((a,r)=>a+r.mesosCost,0);
   return {rows,attempts,mesosCost};
+}
+
+export function silverPresetExpectations(settings,data) {
+  const {fee=null}=settings;
+  if(fee!==null&&(!Number.isFinite(fee)||fee<0||fee>1e12))throw new Error('1회 사용 비용을 확인해주세요.');
+  const upgrade=compareGradeUp({...settings,cube:'silver',target:'unique'});
+  const lines=data?.tables?.[`${settings.part}-${settings.level}`];
+  if(!lines)throw new Error('실버 큐브 확률표를 불러오지 못했습니다.');
+  const rows=[];
+  if(!settings.loot) {
+    const stats=hasAttackPercent(lines)?['공격력','마력']:['주스탯'];
+    for(const stat of stats)for(const threshold of [15,18,21,24,27]) {
+      const any=acceptsAnyMainStat({...settings,stat});
+      const probability=potentialProbability(lines,any?['STR','DEX','INT','LUK']:stat==='주스탯'?'STR':stat,threshold,true);
+      if(probability<=0)continue;
+      const optionAttempts=Math.max(0,1/probability-(upgrade.rows.length?1:0));
+      const attempts=upgrade.attempts+optionAttempts;
+      rows.push({label:`${stat} ${threshold}% 이상`,probability,optionAttempts,attempts,cost:fee===null?null:attempts*fee});
+    }
+  }
+  return {upgrade,rows,cost:fee===null?null:upgrade.attempts*fee};
 }
 
 export function goldExpectation(settings,data) {

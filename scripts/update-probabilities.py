@@ -10,20 +10,23 @@ from bs4 import BeautifulSoup
 
 BASE = 'https://maplestory.nexon.com'
 additional = '--additional' in sys.argv
+silver = '--silver' in sys.argv
 gold = '--gold' in sys.argv
-cube_id = 2711004 if gold else 5062500 if additional else 5062010
-PAGE = BASE + '/Guide/OtherProbability/cube/' + ('artisan' if gold else 'addi' if additional else 'black')
+boss_cube = gold or silver
+cube_id = 2711003 if silver else 2711004 if gold else 5062500 if additional else 5062010
+grade = 3 if silver else 4
+PAGE = BASE + '/Guide/OtherProbability/cube/' + ('master' if silver else 'artisan' if gold else 'addi' if additional else 'black')
 ENDPOINT = BASE + '/Guide/OtherProbability/cube/GetSearchProbList'
 root = Path(__file__).resolve().parents[1]
 session = requests.Session()
 session.get(PAGE, timeout=30).raise_for_status()
 records = {}
 missing = []
-for part in ([2] if gold else []) + [1,3,6,7,9,10,11,12,13,14,15,16,17,18,19,20]:
-    for level in (([90] if part == 16 else []) + [140,145,150,160,200] if gold else [140,145,150,160,200,250]):
+for part in ([2] if boss_cube else []) + [1,3,6,7,9,10,11,12,13,14,15,16,17,18,19,20]:
+    for level in (([90] if part == 16 else []) + [140,145,150,160,200] if boss_cube else [140,145,150,160,200,250]):
         response = session.post(ENDPOINT,
             headers={'X-Requested-With': 'XMLHttpRequest', 'Referer': PAGE},
-            data={'nCubeItemID': cube_id, 'nGrade': 4, 'nPartsType': part, 'nReqLev': level},
+            data={'nCubeItemID': cube_id, 'nGrade': grade, 'nPartsType': part, 'nReqLev': level},
             timeout=30)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -47,7 +50,7 @@ for part in ([2] if gold else []) + [1,3,6,7,9,10,11,12,13,14,15,16,17,18,19,20]
         records[f'{part}-{level}'] = lines
         print(f'Fetched {part}/{level}', flush=True)
 payload = {'retrievedAt': datetime.date.today().isoformat(), 'source': PAGE, 'unavailable': missing,
-           'endpoint': ENDPOINT, 'cubeItemId': cube_id, 'grade': 4, 'tables': records}
-target = root / 'public' / 'data' / ('gold-potential.json' if gold else 'additional.json' if additional else 'potential.json')
+           'endpoint': ENDPOINT, 'cubeItemId': cube_id, 'grade': grade, 'tables': records}
+target = root / 'public' / 'data' / ('silver-potential.json' if silver else 'gold-potential.json' if gold else 'additional.json' if additional else 'potential.json')
 target.parent.mkdir(parents=True, exist_ok=True)
 target.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')

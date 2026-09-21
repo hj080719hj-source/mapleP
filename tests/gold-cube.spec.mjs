@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 test('gold cube equipment buttons, boss cube counts and grade restrictions',async({page})=>{
   await page.goto('/');
-  await page.getByRole('link',{name:'골드 큐브',exact:true}).click();
+  await page.getByRole('link',{name:'큐브 기대값',exact:true}).click();
   await expect(page).toHaveURL(/gold-cube.html$/);
   await expect(page.locator('#cube-price')).toHaveCount(0);
   await expect(page.locator('#gold-equipment button')).toHaveCount(20);
@@ -54,4 +54,26 @@ test('gold options recover after a failed probability download',async({page})=>{
   fail=false;
   await page.locator('#gold-retry').click();
   await expect(page.locator('#mitra-preset-results .mitra-preset')).toHaveCount(3);
+});
+test('silver switch uses unique goals and hides legendary loot presets',async({page})=>{
+  await page.goto('/gold-cube.html');
+  await page.locator('#stat-preset-results').waitFor();
+  await page.locator('#start-grade').selectOption('legendary');
+  await page.locator('[data-cube=silver]').click();
+  await expect(page.locator('#target-grade')).toHaveValue('unique');
+  await expect(page.locator('#start-grade option[value=legendary]')).toHaveJSProperty('disabled',true);
+  await expect(page.locator('#silver-preset-results .mitra-preset')).toHaveCount(5);
+  await page.locator('#gold-miracle').uncheck();
+  await expect(page.locator('#silver-upgrade-count')).toHaveText('84.33개');
+  await page.locator('[data-item=michaela]').click();
+  await expect(page.locator('#gold-result')).toContainText('골드 큐브로 전환');
+  await expect(page.locator('#stat-preset-results')).toHaveCount(0);
+  await page.locator('[data-cube=gold]').click();
+  await expect(page.locator('#start-grade')).toHaveValue('legendary');
+  await expect(page.locator('#stat-preset-results .mitra-preset')).toHaveCount(4);
+  await page.locator('[data-cube=silver]').click();
+  await page.locator('[data-item=mitra]').click();
+  await expect(page.locator('#silver-preset-results .mitra-preset')).toHaveCount(10);
+  await page.setViewportSize({width:390,height:844});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });

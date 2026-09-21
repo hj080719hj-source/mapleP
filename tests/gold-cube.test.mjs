@@ -4,6 +4,26 @@ import {compareGradeUp,goldExpectation,mitraCombinationProbability,mitraPresetEx
 import {gradeUpExpectation,ITEMS} from '../public/js/engine.js';
 import {GOLD_ITEMS} from '../public/js/catalog.js';
 import {readFileSync} from 'node:fs';
+import {silverPresetExpectations} from '../public/js/gold-cube-engine.js';
+const silver=JSON.parse(readFileSync(new URL('../public/data/silver-potential.json',import.meta.url)));
+test('silver rates, unique cap, official tables and promotion roll accounting',()=>{
+  assert.equal(compareGradeUp({cube:'silver',start:'epic',target:'unique',miracle:false}).attempts,1/.011858);
+  assert.equal(compareGradeUp({cube:'silver',start:'rare',target:'epic',miracle:true}).attempts,1/(.047619*2));
+  assert.throws(()=>compareGradeUp({cube:'silver',target:'legendary'}));
+  assert.throws(()=>compareGradeUp({cube:'silver',start:'legendary',target:'legendary'}));
+  assert.equal(silver.grade,3);assert.equal(silver.cubeItemId,2711003);
+  for(const item of GOLD_ITEMS)for(const part of item.parts||[item.part]) {
+    const lines=silver.tables[`${part}-${item.level}`];
+    for(const line of lines)assert.ok(Math.abs(line.reduce((s,o)=>s+o.probability,0)-1)<.001);
+    const s={item:item.id,part,level:item.level,loot:item.loot,start:'unique'};
+    const rolled=silverPresetExpectations(s,silver);
+    assert.equal(rolled.upgrade.attempts,0);
+    if(item.loot){assert.equal(rolled.rows.length,0);continue;}
+    assert.ok(rolled.rows.length>0);
+    const promoted=silverPresetExpectations({...s,start:'epic'},silver);
+    assert.equal(promoted.rows[0].optionAttempts,rolled.rows[0].optionAttempts-1);
+  }
+});
 const data=JSON.parse(readFileSync(new URL('../public/data/gold-potential.json',import.meta.url)));
 test('loot goals require simultaneous drop and mesos and count extra lines once',()=>{
   const line=[{name:'아이템 드롭률 +20%',probability:.25},{name:'메소 획득량 +20%',probability:.25},{name:'STR +12%',probability:.5}];

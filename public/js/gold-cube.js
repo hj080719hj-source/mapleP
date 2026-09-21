@@ -1,10 +1,12 @@
 import {GOLD_ITEMS,PARTS} from './catalog.js?v=michaela';
 import {equipmentIcon} from './icons.js?v=michaela';
-import {goldExpectation,mitraPresetExpectations,statPresetExpectations,lootPresetExpectations,hasAttackPercent,GRADES,GRADE_NAMES} from './gold-cube-engine.js?v=meso40';
+import {goldExpectation,mitraPresetExpectations,statPresetExpectations,lootPresetExpectations,silverPresetExpectations,hasAttackPercent,GRADES,GRADE_NAMES} from './gold-cube-engine.js?v=silver';
 const $=id=>document.getElementById(id), items=GOLD_ITEMS;
 const LEVELS=[...new Set(items.map(item=>item.level))].sort((a,b)=>a-b);
 let selectedItem=items[0],part=selectedItem.part,data;
 let loading=true;
+let cube='gold',silverData;
+const gradeChoices={gold:'epic',silver:'epic'};
 const fees=new Map();
 const number=value=>value.toLocaleString('ko-KR',{maximumFractionDigits:2});
 const money=value=>`${number(value/1e8)}억 메소`;
@@ -38,6 +40,22 @@ function syncThreshold() {
   $('gold-option-hint').textContent=!stat?'목표 옵션을 선택하면 레전드리 옵션 달성까지 계산합니다.':stat==='주스탯'?(selectedItem.shared?'공용 장비: STR·DEX·INT·LUK 중 한 스탯이 목표에 도달하면 성공. 올스탯% 포함.':'직업 전용 장비: 한 주스탯을 저격합니다. 올스탯% 포함.'):'선택한 옵션의 세 줄 합계를 계산합니다.';
 }
 function update() {
+  $('cube-limit').textContent=cube==='silver'?'실버 큐브 · 유니크까지':'골드 큐브 · 레전드리까지';
+  $('silver-help').hidden=cube!=='silver';$('gold-help').hidden=cube==='silver';
+  $('start-grade').querySelector('[value="legendary"]').disabled=cube==='silver';
+  $('gold-retry').hidden=loading||!!(cube==='silver'?silverData:data);
+  if(cube==='silver') {
+    $('gold-custom-goal').hidden=true;$('mitra-presets-note').hidden=true;$('mitra-combination').hidden=true;
+    if($('start-grade').value==='legendary')$('start-grade').value='unique';
+    $('target-grade').value='unique';$('target-grade').disabled=true;
+    if(!silverData){$('gold-result').textContent=loading?'실버 큐브 확률 불러오는 중…':'실버 큐브 확률표를 다시 불러와주세요.';$('gold-breakdown').replaceChildren();return;}
+    try {
+      const result=silverPresetExpectations({item:selectedItem.id,part,level:selectedItem.level,loot:selectedItem.loot,start:$('start-grade').value,miracle:$('gold-miracle').checked,fee:$('gold-fee').value===''?null:$('gold-fee').valueAsNumber},silverData);
+      $('gold-result').innerHTML=`<h2>실버 큐브 · ${selectedItem.name}</h2><p class="hint">유니크까지 등업에 필요한 평균 큐브</p><strong class="gold-total" id="silver-upgrade-count">${number(result.upgrade.attempts)}개</strong><p class="hint">등업 사용 비용: ${result.cost===null?'1회 사용 비용 확인 필요':money(result.cost)}</p>${selectedItem.loot?'<p class="notice">드롭률·메소 획득량은 레전드리 옵션입니다. 유니크까지 실버로 등업한 뒤 골드 큐브로 전환해주세요.</p>':`<p class="hint">유니크 옵션별 기대값 · 등업 포함. ${selectedItem.shared?'주스탯은 네 스탯 중 하나가 목표에 도달하면 성공.':'한 주스탯 또는 공격력·마력 각각의 기준.'} 주스탯에 올스탯% 포함.</p><div id="silver-preset-results">${result.rows.map(row=>`<section class="mitra-preset"><h3>${row.label}</h3><strong class="gold-total">${number(row.attempts)}개</strong><p class="hint">등업 ${number(result.upgrade.attempts)}개 + 옵션 추가 ${number(row.optionAttempts)}개</p><p class="hint">사용 비용: ${row.cost===null?'1회 사용 비용 확인 필요':money(row.cost)}</p></section>`).join('')}</div>`}`;
+      $('gold-breakdown').innerHTML=result.upgrade.rows.length?`<dl class="metrics">${result.upgrade.rows.map(row=>`<div><dt>${row.name} · ${(row.probability*100).toFixed(4)}%</dt><dd>${number(row.attempts)}개</dd></div>`).join('')}</dl>`:'<p class="hint">이미 유니크이므로 등업 비용이 없습니다.</p>';
+    }catch(error){$('gold-result').textContent=error.message;$('gold-breakdown').replaceChildren();}
+    return;
+  }
   const lines=data?.tables?.[`${part}-${selectedItem.level}`];
   const statFixed=!!lines && !hasAttackPercent(lines);
   const fixed=selectedItem.id==='mitra';
@@ -86,7 +104,7 @@ function update() {
   } catch(error) { $('gold-result').textContent=error.message; $('gold-breakdown').replaceChildren(); }
 }
 function switchEquipment() {
-  $('gold-fee').value=fees.get(`${selectedItem.id}-${part}`)??'';
+  $('gold-fee').value=fees.get(`${cube}-${selectedItem.id}-${part}`)??'';
   syncGoals();update();
 }
 $('gold-equipment').addEventListener('click',event=>{
@@ -97,17 +115,26 @@ $('gold-equipment').addEventListener('click',event=>{
 });
 $('gold-parts').addEventListener('click',event=>{const button=event.target.closest('button[data-part]');if(button){part=Number(button.dataset.part);switchEquipment();}});
 $('gold-form').addEventListener('change',event=>{if(event.target.id==='gold-stat')syncThreshold();update();});
-$('gold-fee').addEventListener('input',()=>{fees.set(`${selectedItem.id}-${part}`,$('gold-fee').value);update();});
+$('gold-fee').addEventListener('input',()=>{fees.set(`${cube}-${selectedItem.id}-${part}`,$('gold-fee').value);update();});
+$('cube-type').addEventListener('click',event=>{
+  const button=event.target.closest('button[data-cube]');if(!button||button.dataset.cube===cube)return;
+  gradeChoices[cube]=$('start-grade').value;cube=button.dataset.cube;
+  $('start-grade').value=gradeChoices[cube];
+  for(const b of $('cube-type').querySelectorAll('button'))b.setAttribute('aria-pressed',String(b===button));
+  switchEquipment();
+});
 $('gold-form').addEventListener('submit',event=>event.preventDefault());
 async function loadData() {
   loading=true;$('gold-retry').hidden=true;syncGoals();update();
-  try {
-    const response=await fetch(new URL('../data/gold-potential.json?v=michaela',import.meta.url),{cache:'no-cache'});
+  const results=await Promise.allSettled(['gold','silver'].map(async kind=>{
+    const response=await fetch(new URL(`../data/${kind}-potential.json?v=silver`,import.meta.url),{cache:'no-cache'});
     if(!response.ok)throw new Error();
     const next=await response.json();
     for(const item of items)for(const p of item.parts||[item.part])if(next.tables?.[`${p}-${item.level}`]?.length!==3)throw new Error();
-    data=next;
-  } catch {data=undefined;$('gold-retry').hidden=false;}
+    return next;
+  }));
+  data=results[0].status==='fulfilled'?results[0].value:undefined;
+  silverData=results[1].status==='fulfilled'?results[1].value:undefined;
   loading=false;syncGoals();update();
 }
 $('gold-retry').addEventListener('click',loadData);

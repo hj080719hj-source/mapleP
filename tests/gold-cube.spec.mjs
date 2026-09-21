@@ -31,7 +31,8 @@ test('gold cube equipment buttons, boss cube counts and grade restrictions',asyn
   await page.locator('[data-item=astra]').click();
   await expect(page.locator('#gold-custom-goal')).toBeVisible();
   await page.locator('[data-item=michaela]').click();
-  await expect(page.locator('#stat-preset-results .mitra-preset')).toHaveCount(3);
+  await expect(page.locator('#stat-preset-results .mitra-preset')).toHaveCount(4);
+  await expect(page.locator('#stat-preset-results')).toContainText('메소 획득량 40% 이상');
   await expect(page.locator('#stat-preset-results')).toContainText('드롭률 20% + 메소 획득량 20%');
   await expect.poll(()=>page.locator('[data-item=michaela] img').evaluate(img=>img.naturalWidth)).toBeGreaterThan(0);
   await expect(page.locator('#gold-custom-goal')).toBeHidden();

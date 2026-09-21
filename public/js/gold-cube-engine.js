@@ -24,7 +24,8 @@ export function lootPresetExpectations(settings,data) {
   return [
     {label:'드롭률 20% 이상',stat:'드롭률',threshold:20},
     {label:'드롭률 40% 이상',stat:'드롭률',threshold:40},
-    {label:'드롭률 20% + 메소 획득량 20% 이상',stat:'드메',threshold:20}
+    {label:'드롭률 20% + 메소 획득량 20% 이상',stat:'드메',threshold:20},
+    {label:'메소 획득량 40% 이상',stat:'메소 획득량',threshold:40}
   ].map(preset=>({...preset,result:goldExpectation({...settings,...preset},data)}));
 }
 export function hasAttackPercent(lines) {
@@ -77,10 +78,10 @@ export function goldExpectation(settings,data) {
   const upgrade=compareGradeUp({...settings,target:stat?'legendary':settings.target});
   let probability=null, optionAttempts=0;
   if(stat) {
-    if(!['주스탯','올스탯','공격력','마력','쿨타임 감소','크리티컬 데미지','드롭률','드메'].includes(stat)||!Number.isFinite(threshold)||threshold<=0) throw new Error('목표 옵션을 확인해주세요.');
+    if(!['주스탯','올스탯','공격력','마력','쿨타임 감소','크리티컬 데미지','드롭률','드메','메소 획득량'].includes(stat)||!Number.isFinite(threshold)||threshold<=0) throw new Error('목표 옵션을 확인해주세요.');
     const lines=data?.tables?.[`${settings.part}-${settings.level}`];
     const anyMainStat=acceptsAnyMainStat(settings);
-    probability=['드롭률','드메'].includes(stat)?lootProbability(lines,threshold,stat==='드메'?20:0):settings.item==='mitra' && settings.part===2 && settings.allowIed && ['공격력','마력'].includes(stat)
+    probability=stat==='메소 획득량'?lootProbability(lines,0,threshold):['드롭률','드메'].includes(stat)?lootProbability(lines,threshold,stat==='드메'?20:0):settings.item==='mitra' && settings.part===2 && settings.allowIed && ['공격력','마력'].includes(stat)
       ?mitraCombinationProbability(lines,stat,settings.iedOnly?Infinity:threshold,settings.twoLineThreshold??21)
       :potentialProbability(lines,anyMainStat?['STR','DEX','INT','LUK']:stat==='주스탯'?'STR':stat,threshold,true);
     if(probability<=0) throw new Error('이 장비에서는 선택한 목표 옵션이 등장하지 않습니다.');

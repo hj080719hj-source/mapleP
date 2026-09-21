@@ -12,7 +12,9 @@ test('loot goals require simultaneous drop and mesos and count extra lines once'
   assert.equal(lootProbability([line,line,line],20,20),1-2*.75**3+.5**3);
   const settings={item:'michaela',level:90,part:16,start:'legendary'};
   const rows=lootPresetExpectations(settings,data);
-  assert.equal(rows.length,3);
+  assert.equal(rows.length,4);
+  assert.equal(rows[3].result.probability,lootProbability(data.tables['16-90'],0,40));
+  assert.equal(lootProbability([line,line,line],0,40),3*.25**2*.75+.25**3);
   assert.ok(rows[0].result.attempts<rows[1].result.attempts);
   assert.ok(rows[0].result.attempts<rows[2].result.attempts);
   for(const row of rows){assert.ok(Number.isFinite(row.result.attempts));assert.equal(row.result.upgrade.attempts,0);}

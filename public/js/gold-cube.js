@@ -1,6 +1,6 @@
 import {GOLD_ITEMS,PARTS} from './catalog.js?v=michaela';
 import {equipmentIcon} from './icons.js?v=michaela';
-import {goldExpectation,mitraPresetExpectations,statPresetExpectations,lootPresetExpectations,hasAttackPercent,GRADES,GRADE_NAMES} from './gold-cube-engine.js?v=michaela';
+import {goldExpectation,mitraPresetExpectations,statPresetExpectations,lootPresetExpectations,hasAttackPercent,GRADES,GRADE_NAMES} from './gold-cube-engine.js?v=meso40';
 const $=id=>document.getElementById(id), items=GOLD_ITEMS;
 const LEVELS=[...new Set(items.map(item=>item.level))].sort((a,b)=>a-b);
 let selectedItem=items[0],part=selectedItem.part,data;

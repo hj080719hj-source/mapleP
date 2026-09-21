@@ -29,4 +29,5 @@ export const ITEMS = [
   {id:'destiny',name:'데스티니 무기',label:'데스티니 무기',level:250,part:1,special:true},
 ].map(item=>({...item,shared:!['arcane','astra','eternal-main','eternal-extra','destiny'].includes(item.id)}));
 export const GOLD_ITEMS = [...ITEMS.filter(item=>item.level<=200),
+  {id:'michaela',name:'미카엘라의 새 안경',label:'미카엘라의 새 안경',level:90,part:16,shared:true,loot:true},
   {id:'mitra',name:'미트라의 분노',label:'미트라의 분노',level:200,part:2,shared:false}];

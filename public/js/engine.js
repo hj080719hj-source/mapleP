@@ -66,7 +66,7 @@ export function gradeUpExpectation(level, miracle = false, startingGrade = 'epic
   return {rows,attempts:rows.reduce((sum,r)=>sum+r.attempts,0),cost:rows.reduce((sum,r)=>sum+r.cost,0)};
 }
 
-function restriction(name) {
+export function restriction(name) {
   if (name.includes('쓸만한')) return ['skill', 1];
   if (name.includes('피격 후 무적시간')) return ['afterHit', 1];
   if (name.includes('피격 시') && name.includes('데미지의') && name.includes('무시')) return ['ignore', 2];

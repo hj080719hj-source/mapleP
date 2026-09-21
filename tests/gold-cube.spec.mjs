@@ -4,7 +4,7 @@ test('gold cube equipment buttons, boss cube counts and grade restrictions',asyn
   await page.getByRole('link',{name:'골드 큐브',exact:true}).click();
   await expect(page).toHaveURL(/gold-cube.html$/);
   await expect(page.locator('#cube-price')).toHaveCount(0);
-  await expect(page.locator('#gold-equipment button')).toHaveCount(19);
+  await expect(page.locator('#gold-equipment button')).toHaveCount(20);
   await expect(page.locator('#gold-custom-goal')).toBeHidden();
   const main=page.locator('#stat-preset-results .mitra-preset');
   await expect(main).toHaveCount(4);
@@ -30,6 +30,11 @@ test('gold cube equipment buttons, boss cube counts and grade restrictions',asyn
   await expect(page.locator('#mitra-preset-results')).not.toHaveText(before);
   await page.locator('[data-item=astra]').click();
   await expect(page.locator('#gold-custom-goal')).toBeVisible();
+  await page.locator('[data-item=michaela]').click();
+  await expect(page.locator('#stat-preset-results .mitra-preset')).toHaveCount(3);
+  await expect(page.locator('#stat-preset-results')).toContainText('드롭률 20% + 메소 획득량 20%');
+  await expect.poll(()=>page.locator('[data-item=michaela] img').evaluate(img=>img.naturalWidth)).toBeGreaterThan(0);
+  await expect(page.locator('#gold-custom-goal')).toBeHidden();
   await page.setViewportSize({width:390,height:844});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.getByRole('link',{name:'장비 기대값',exact:true}).click();

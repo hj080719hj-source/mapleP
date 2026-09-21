@@ -1,9 +1,32 @@
-import {gradeUpExpectation,potentialProbability,acceptsAnyMainStat} from './engine.js';
+import {gradeUpExpectation,potentialProbability,acceptsAnyMainStat,restriction} from './engine.js';
 
 export const GRADES = ['rare','epic','unique','legendary'];
 export const GRADE_NAMES = ['레어','에픽','유니크','레전드리'];
 // Nexon: Guide/OtherProbability/cube/artisan. Gold cubes have no mesos-reroll pity.
 export const GOLD_RATES = [.079994,.016959,.001996];
+export function lootProbability(lines,dropGoal,mesoGoal=0) {
+  if(!Array.isArray(lines)||lines.length!==3)throw new Error('드메 확률표를 불러오지 못했습니다.');
+  function visit(index,drop,meso,seen) {
+    if(index===3)return drop>=dropGoal&&meso>=mesoGoal?1:0;
+    const options=lines[index].filter(o=>{const r=restriction(o.name);return !r||(seen[r[0]]||0)<r[1];});
+    const total=options.reduce((sum,o)=>sum+o.probability,0);
+    if(!(total>0))throw new Error('드메 확률표가 올바르지 않습니다.');
+    return options.reduce((sum,o)=>{
+      const rule=restriction(o.name),next=rule?{...seen,[rule[0]]:(seen[rule[0]]||0)+1}:seen;
+      const d=Number(o.name.match(/^아이템 드롭률 \+(\d+)%$/)?.[1]||0);
+      const m=Number(o.name.match(/^메소 획득량 \+(\d+)%$/)?.[1]||0);
+      return sum+o.probability/total*visit(index+1,drop+d,meso+m,next);
+    },0);
+  }
+  return visit(0,0,0,{});
+}
+export function lootPresetExpectations(settings,data) {
+  return [
+    {label:'드롭률 20% 이상',stat:'드롭률',threshold:20},
+    {label:'드롭률 40% 이상',stat:'드롭률',threshold:40},
+    {label:'드롭률 20% + 메소 획득량 20% 이상',stat:'드메',threshold:20}
+  ].map(preset=>({...preset,result:goldExpectation({...settings,...preset},data)}));
+}
 export function hasAttackPercent(lines) {
   return !!lines?.some(line=>line.some(o=>o.probability>0 && /^(공격력|마력) \+\d+%$/.test(o.name)));
 }
@@ -37,7 +60,7 @@ export function mitraCombinationProbability(lines,stat,threeLineThreshold,twoLin
 }
 export function compareGradeUp({level=140,start='epic',target='legendary',miracle=true}={}) {
   const from=GRADES.indexOf(start), to=GRADES.indexOf(target);
-  if (![140,145,150,160,200].includes(level)) throw new Error('200제 이하 지원 장비를 선택해주세요.');
+  if (![90,140,145,150,160,200].includes(level)) throw new Error('200제 이하 지원 장비를 선택해주세요.');
   if (from<0 || to<0 || from>to) throw new Error('목표 등급은 시작 등급 이상이어야 합니다.');
   const mesos=gradeUpExpectation(level,miracle,start).rows.slice(0,to-from);
   const rows=mesos.map((row,i)=>{
@@ -54,10 +77,10 @@ export function goldExpectation(settings,data) {
   const upgrade=compareGradeUp({...settings,target:stat?'legendary':settings.target});
   let probability=null, optionAttempts=0;
   if(stat) {
-    if(!['주스탯','올스탯','공격력','마력','쿨타임 감소','크리티컬 데미지'].includes(stat)||!Number.isFinite(threshold)||threshold<=0) throw new Error('목표 옵션을 확인해주세요.');
+    if(!['주스탯','올스탯','공격력','마력','쿨타임 감소','크리티컬 데미지','드롭률','드메'].includes(stat)||!Number.isFinite(threshold)||threshold<=0) throw new Error('목표 옵션을 확인해주세요.');
     const lines=data?.tables?.[`${settings.part}-${settings.level}`];
     const anyMainStat=acceptsAnyMainStat(settings);
-    probability=settings.item==='mitra' && settings.part===2 && settings.allowIed && ['공격력','마력'].includes(stat)
+    probability=['드롭률','드메'].includes(stat)?lootProbability(lines,threshold,stat==='드메'?20:0):settings.item==='mitra' && settings.part===2 && settings.allowIed && ['공격력','마력'].includes(stat)
       ?mitraCombinationProbability(lines,stat,settings.iedOnly?Infinity:threshold,settings.twoLineThreshold??21)
       :potentialProbability(lines,anyMainStat?['STR','DEX','INT','LUK']:stat==='주스탯'?'STR':stat,threshold,true);
     if(probability<=0) throw new Error('이 장비에서는 선택한 목표 옵션이 등장하지 않습니다.');

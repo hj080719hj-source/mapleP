@@ -20,7 +20,7 @@ session.get(PAGE, timeout=30).raise_for_status()
 records = {}
 missing = []
 for part in ([2] if gold else []) + [1,3,6,7,9,10,11,12,13,14,15,16,17,18,19,20]:
-    for level in ([140,145,150,160,200] if gold else [140,145,150,160,200,250]):
+    for level in (([90] if part == 16 else []) + [140,145,150,160,200] if gold else [140,145,150,160,200,250]):
         response = session.post(ENDPOINT,
             headers={'X-Requested-With': 'XMLHttpRequest', 'Referer': PAGE},
             data={'nCubeItemID': cube_id, 'nGrade': 4, 'nPartsType': part, 'nReqLev': level},

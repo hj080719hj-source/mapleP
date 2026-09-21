@@ -1,10 +1,24 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {compareGradeUp,goldExpectation,mitraCombinationProbability,mitraPresetExpectations,statPresetExpectations,hasAttackPercent} from '../public/js/gold-cube-engine.js';
+import {compareGradeUp,goldExpectation,mitraCombinationProbability,mitraPresetExpectations,statPresetExpectations,hasAttackPercent,lootProbability,lootPresetExpectations} from '../public/js/gold-cube-engine.js';
 import {gradeUpExpectation,ITEMS} from '../public/js/engine.js';
 import {GOLD_ITEMS} from '../public/js/catalog.js';
 import {readFileSync} from 'node:fs';
 const data=JSON.parse(readFileSync(new URL('../public/data/gold-potential.json',import.meta.url)));
+test('loot goals require simultaneous drop and mesos and count extra lines once',()=>{
+  const line=[{name:'아이템 드롭률 +20%',probability:.25},{name:'메소 획득량 +20%',probability:.25},{name:'STR +12%',probability:.5}];
+  assert.equal(lootProbability([line,line,line],20),1-.75**3);
+  assert.equal(lootProbability([line,line,line],40),3*.25**2*.75+.25**3);
+  assert.equal(lootProbability([line,line,line],20,20),1-2*.75**3+.5**3);
+  const settings={item:'michaela',level:90,part:16,start:'legendary'};
+  const rows=lootPresetExpectations(settings,data);
+  assert.equal(rows.length,3);
+  assert.ok(rows[0].result.attempts<rows[1].result.attempts);
+  assert.ok(rows[0].result.attempts<rows[2].result.attempts);
+  for(const row of rows){assert.ok(Number.isFinite(row.result.attempts));assert.equal(row.result.upgrade.attempts,0);}
+  const promoted=lootPresetExpectations({...settings,start:'unique'},data);
+  assert.equal(promoted[0].result.optionAttempts,rows[0].result.optionAttempts-1);
+});
 test('automatic stat presets cover non-attack equipment, with increasing expectations',()=>{
   for(const item of GOLD_ITEMS)for(const part of item.parts||[item.part]) {
     if(hasAttackPercent(data.tables[`${part}-${item.level}`]))continue;

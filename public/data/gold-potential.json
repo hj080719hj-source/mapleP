@@ -14326,6 +14326,222 @@
         }
       ]
     ],
+    "16-90": [
+      [
+        {
+          "name": "STR +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "DEX +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "INT +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "LUK +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "최대 HP +12%",
+          "probability": 0.096774
+        },
+        {
+          "name": "최대 MP +12%",
+          "probability": 0.096774
+        },
+        {
+          "name": "올스탯 +9%",
+          "probability": 0.064516
+        },
+        {
+          "name": "모든 스킬의 MP 소모 -10%",
+          "probability": 0.096774
+        },
+        {
+          "name": "모든 스킬의 MP 소모 -20%",
+          "probability": 0.096774
+        },
+        {
+          "name": "HP 회복 아이템 및 회복 스킬 효율 +40%",
+          "probability": 0.096774
+        },
+        {
+          "name": "메소 획득량 +20%",
+          "probability": 0.096774
+        },
+        {
+          "name": "아이템 드롭률 +20%",
+          "probability": 0.096774
+        }
+      ],
+      [
+        {
+          "name": "STR +9%",
+          "probability": 0.1108893
+        },
+        {
+          "name": "DEX +9%",
+          "probability": 0.1108893
+        },
+        {
+          "name": "INT +9%",
+          "probability": 0.1108893
+        },
+        {
+          "name": "LUK +9%",
+          "probability": 0.1108893
+        },
+        {
+          "name": "최대 HP +9%",
+          "probability": 0.166334
+        },
+        {
+          "name": "최대 MP +9%",
+          "probability": 0.166334
+        },
+        {
+          "name": "올스탯 +6%",
+          "probability": 0.055445
+        },
+        {
+          "name": "HP 회복 아이템 및 회복 스킬 효율 +30%",
+          "probability": 0.166334
+        },
+        {
+          "name": "STR +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "DEX +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "INT +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "LUK +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "최대 HP +12%",
+          "probability": 0.0001932
+        },
+        {
+          "name": "최대 MP +12%",
+          "probability": 0.0001932
+        },
+        {
+          "name": "올스탯 +9%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "모든 스킬의 MP 소모 -10%",
+          "probability": 0.0001932
+        },
+        {
+          "name": "모든 스킬의 MP 소모 -20%",
+          "probability": 0.0001932
+        },
+        {
+          "name": "HP 회복 아이템 및 회복 스킬 효율 +40%",
+          "probability": 0.0001932
+        },
+        {
+          "name": "메소 획득량 +20%",
+          "probability": 0.0001932
+        },
+        {
+          "name": "아이템 드롭률 +20%",
+          "probability": 0.0001932
+        }
+      ],
+      [
+        {
+          "name": "STR +9%",
+          "probability": 0.1108893
+        },
+        {
+          "name": "DEX +9%",
+          "probability": 0.1108893
+        },
+        {
+          "name": "INT +9%",
+          "probability": 0.1108893
+        },
+        {
+          "name": "LUK +9%",
+          "probability": 0.1108893
+        },
+        {
+          "name": "최대 HP +9%",
+          "probability": 0.166334
+        },
+        {
+          "name": "최대 MP +9%",
+          "probability": 0.166334
+        },
+        {
+          "name": "올스탯 +6%",
+          "probability": 0.055445
+        },
+        {
+          "name": "HP 회복 아이템 및 회복 스킬 효율 +30%",
+          "probability": 0.166334
+        },
+        {
+          "name": "STR +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "DEX +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "INT +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "LUK +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "최대 HP +12%",
+          "probability": 0.0001932
+        },
+        {
+          "name": "최대 MP +12%",
+          "probability": 0.0001932
+        },
+        {
+          "name": "올스탯 +9%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "모든 스킬의 MP 소모 -10%",
+          "probability": 0.0001932
+        },
+        {
+          "name": "모든 스킬의 MP 소모 -20%",
+          "probability": 0.0001932
+        },
+        {
+          "name": "HP 회복 아이템 및 회복 스킬 효율 +40%",
+          "probability": 0.0001932
+        },
+        {
+          "name": "메소 획득량 +20%",
+          "probability": 0.0001932
+        },
+        {
+          "name": "아이템 드롭률 +20%",
+          "probability": 0.0001932
+        }
+      ]
+    ],
     "16-140": [
       [
         {

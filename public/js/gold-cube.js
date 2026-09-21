@@ -1,7 +1,8 @@
-import {GOLD_ITEMS,LEVELS,PARTS} from './catalog.js';
-import {equipmentIcon} from './icons.js?v=mitra';
-import {goldExpectation,mitraPresetExpectations,statPresetExpectations,hasAttackPercent,GRADES,GRADE_NAMES} from './gold-cube-engine.js?v=stat-presets';
+import {GOLD_ITEMS,PARTS} from './catalog.js?v=michaela';
+import {equipmentIcon} from './icons.js?v=michaela';
+import {goldExpectation,mitraPresetExpectations,statPresetExpectations,lootPresetExpectations,hasAttackPercent,GRADES,GRADE_NAMES} from './gold-cube-engine.js?v=michaela';
 const $=id=>document.getElementById(id), items=GOLD_ITEMS;
+const LEVELS=[...new Set(items.map(item=>item.level))].sort((a,b)=>a-b);
 let selectedItem=items[0],part=selectedItem.part,data;
 let loading=true;
 const fees=new Map();
@@ -46,8 +47,8 @@ function update() {
     $('mitra-combination').hidden=true;
     $('target-grade').value='legendary';$('target-grade').disabled=true;
     try {
-      const rows=statPresetExpectations({item:selectedItem.id,part,level:selectedItem.level,start:$('start-grade').value,miracle:$('gold-miracle').checked,fee:$('gold-fee').value===''?null:$('gold-fee').valueAsNumber},data);
-      $('gold-result').innerHTML=`<h2>${selectedItem.name}${selectedItem.parts?` · ${PARTS[part]}`:''}</h2><p class="hint">${selectedItem.shared?'공용 장비: STR·DEX·INT·LUK 중 한 스탯이 목표에 도달하면 성공.':'직업 전용 장비: 한 주스탯을 저격하는 기준.'} 올스탯% 포함.</p><div id="stat-preset-results">${rows.map(row=>`<section class="mitra-preset" data-stat="${row.stat}"><h3>${row.label}</h3><strong class="gold-total">${number(row.result.attempts)}개</strong><p class="hint">등업 ${number(row.result.upgrade.attempts)}개 + 옵션 추가 ${number(row.result.optionAttempts)}개</p><p class="hint">사용 비용: ${row.result.cost===null?'1회 사용 비용 확인 필요':money(row.result.cost)}</p></section>`).join('')}</div>`;
+      const rows=(selectedItem.loot?lootPresetExpectations:statPresetExpectations)({item:selectedItem.id,part,level:selectedItem.level,start:$('start-grade').value,miracle:$('gold-miracle').checked,fee:$('gold-fee').value===''?null:$('gold-fee').valueAsNumber},data);
+      $('gold-result').innerHTML=`<h2>${selectedItem.name}${selectedItem.parts?` · ${PARTS[part]}`:''}</h2><p class="hint">${selectedItem.loot?'드롭률·드메 조합별 기대값입니다. 드메는 드롭률과 메소 획득량을 동시에 만족해야 합니다.':selectedItem.shared?'공용 장비: STR·DEX·INT·LUK 중 한 스탯이 목표에 도달하면 성공. 올스탯% 포함.':'직업 전용 장비: 한 주스탯을 저격하는 기준. 올스탯% 포함.'}</p><div id="stat-preset-results">${rows.map(row=>`<section class="mitra-preset" data-stat="${row.stat}"><h3>${row.label}</h3><strong class="gold-total">${number(row.result.attempts)}개</strong><p class="hint">등업 ${number(row.result.upgrade.attempts)}개 + 옵션 추가 ${number(row.result.optionAttempts)}개</p><p class="hint">사용 비용: ${row.result.cost===null?'1회 사용 비용 확인 필요':money(row.result.cost)}</p></section>`).join('')}</div>`;
       const upgrade=rows[0].result.upgrade;
       $('gold-breakdown').innerHTML=upgrade.rows.length?`<dl class="metrics">${upgrade.rows.map(row=>`<div><dt>${row.name}</dt><dd>${number(row.attempts)}개</dd></div>`).join('')}</dl>`:'<p class="hint">이미 레전드리이므로 옵션 재설정만 계산합니다.</p>';
     }catch(error){$('gold-result').textContent=error.message;$('gold-breakdown').replaceChildren();}
@@ -101,7 +102,7 @@ $('gold-form').addEventListener('submit',event=>event.preventDefault());
 async function loadData() {
   loading=true;$('gold-retry').hidden=true;syncGoals();update();
   try {
-    const response=await fetch(new URL('../data/gold-potential.json?v=mitra-2',import.meta.url),{cache:'no-cache'});
+    const response=await fetch(new URL('../data/gold-potential.json?v=michaela',import.meta.url),{cache:'no-cache'});
     if(!response.ok)throw new Error();
     const next=await response.json();
     for(const item of items)for(const p of item.parts||[item.part])if(next.tables?.[`${p}-${item.level}`]?.length!==3)throw new Error();

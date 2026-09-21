@@ -1,6 +1,6 @@
 import {GOLD_ITEMS,LEVELS,PARTS} from './catalog.js';
 import {equipmentIcon} from './icons.js?v=mitra';
-import {goldExpectation,GRADES,GRADE_NAMES} from './gold-cube-engine.js?v=mitra-combination';
+import {goldExpectation,mitraPresetExpectations,GRADES,GRADE_NAMES} from './gold-cube-engine.js?v=mitra-presets';
 const $=id=>document.getElementById(id), items=GOLD_ITEMS;
 let selectedItem=items[0],part=selectedItem.part,data;
 let loading=true;
@@ -37,6 +37,22 @@ function syncThreshold() {
   $('gold-option-hint').textContent=!stat?'목표 옵션을 선택하면 레전드리 옵션 달성까지 계산합니다.':stat==='주스탯'?(selectedItem.shared?'공용 장비: STR·DEX·INT·LUK 중 한 스탯이 목표에 도달하면 성공. 올스탯% 포함.':'직업 전용 장비: 한 주스탯을 저격합니다. 올스탯% 포함.'):'선택한 옵션의 세 줄 합계를 계산합니다.';
 }
 function update() {
+  const fixed=selectedItem.id==='mitra';
+  $('gold-custom-goal').hidden=fixed;
+  $('mitra-presets-note').hidden=!fixed;
+  if(fixed) {
+    $('mitra-combination').hidden=true;
+    $('target-grade').value='legendary';$('target-grade').disabled=true;
+    if(!data){$('gold-result').textContent=loading?'옵션 확률 불러오는 중…':'확률표를 다시 불러와주세요.';$('gold-breakdown').replaceChildren();return;}
+    try {
+      const rows=mitraPresetExpectations({start:$('start-grade').value,miracle:$('gold-miracle').checked,fee:$('gold-fee').value===''?null:$('gold-fee').valueAsNumber},data);
+      const counts=(a,b)=>Math.abs(a-b)<1e-7?`${number(a)}개`:`공 ${number(a)}개 / 마 ${number(b)}개`;
+      $('gold-result').innerHTML=`<h2>미트라의 분노 · 유효 옵션별 기대값</h2><p class="hint">각 조합을 개별 목표로 계산합니다. 공/마는 공격력형 또는 마력형 각각의 기준이며 섞어 세지 않습니다.</p><div id="mitra-preset-results">${rows.map(row=>`<section class="mitra-preset"><h3>${row.label}</h3><strong class="gold-total">${counts(row.attack.attempts,row.magic.attempts)}</strong><p class="hint">등업 ${number(row.attack.upgrade.attempts)}개 + 옵션 추가 ${counts(row.attack.optionAttempts,row.magic.optionAttempts)}</p><p class="hint">사용 비용: ${row.attack.cost===null?'1회 사용 비용 확인 필요':Math.abs(row.attack.cost-row.magic.cost)<1e-7?money(row.attack.cost):`공 ${money(row.attack.cost)} / 마 ${money(row.magic.cost)}`}</p></section>`).join('')}</div><p class="hint">표시한 공마 합계 % 이상을 성공으로 인정합니다. 방무 조합은 공마 2줄 + 방무 1줄만 계산하며 방무 수치는 무관합니다.</p>`;
+      const upgrade=rows[0].attack.upgrade;
+      $('gold-breakdown').innerHTML=upgrade.rows.length?`<dl class="metrics">${upgrade.rows.map(row=>`<div><dt>${row.name}</dt><dd>${number(row.attempts)}개</dd></div>`).join('')}</dl>`:'<p class="hint">이미 레전드리이므로 옵션 재설정만 계산합니다.</p>';
+    }catch(error){$('gold-result').textContent=error.message;$('gold-breakdown').replaceChildren();}
+    return;
+  }
   const stat=$('gold-stat').value,from=GRADES.indexOf($('start-grade').value);
   const mitra=selectedItem.id==='mitra'&&['공격력','마력'].includes(stat);
   const allowIed=mitra&&$('mitra-ied').checked;

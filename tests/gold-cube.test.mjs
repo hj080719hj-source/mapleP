@@ -1,10 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {compareGradeUp,goldExpectation,mitraCombinationProbability} from '../public/js/gold-cube-engine.js';
+import {compareGradeUp,goldExpectation,mitraCombinationProbability,mitraPresetExpectations} from '../public/js/gold-cube-engine.js';
 import {gradeUpExpectation,ITEMS} from '../public/js/engine.js';
 import {GOLD_ITEMS} from '../public/js/catalog.js';
 import {readFileSync} from 'node:fs';
 const data=JSON.parse(readFileSync(new URL('../public/data/gold-potential.json',import.meta.url)));
+test('fixed Mitra presets evaluate IED-only combinations separately from pure attack',()=>{
+  const rows=mitraPresetExpectations({start:'legendary'},data);
+  assert.equal(rows.length,3);
+  const lines=data.tables['2-200'];
+  assert.equal(rows[1].attack.probability,mitraCombinationProbability(lines,'공격력',Infinity,21));
+  assert.equal(rows[2].attack.probability,mitraCombinationProbability(lines,'공격력',Infinity,18));
+  assert.ok(rows[2].attack.attempts<rows[1].attack.attempts);
+  for(const row of rows){assert.equal(row.attack.upgrade.attempts,0);assert.ok(Math.abs(row.attack.attempts-row.magic.attempts)<1e-7);}
+});
 test('Mitra union counts three attack or two attack plus one IED, never mixed attack/magic',()=>{
   const line=['공격력 +12%','마력 +12%','몬스터 방어율 무시 +35%','STR +12%'].map(name=>({name,probability:.25}));
   assert.equal(mitraCombinationProbability([line,line,line],'공격력',27,21),4/64);

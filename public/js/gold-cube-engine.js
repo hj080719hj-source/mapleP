@@ -48,7 +48,7 @@ export function goldExpectation(settings,data) {
     const lines=data?.tables?.[`${settings.part}-${settings.level}`];
     const anyMainStat=acceptsAnyMainStat(settings);
     probability=settings.item==='mitra' && settings.part===2 && settings.allowIed && ['공격력','마력'].includes(stat)
-      ?mitraCombinationProbability(lines,stat,threshold,settings.twoLineThreshold??21)
+      ?mitraCombinationProbability(lines,stat,settings.iedOnly?Infinity:threshold,settings.twoLineThreshold??21)
       :potentialProbability(lines,anyMainStat?['STR','DEX','INT','LUK']:stat==='주스탯'?'STR':stat,threshold,true);
     if(probability<=0) throw new Error('이 장비에서는 선택한 목표 옵션이 등장하지 않습니다.');
     // Promotion produces the first legendary roll; do not charge it twice.
@@ -56,4 +56,12 @@ export function goldExpectation(settings,data) {
   }
   const attempts=upgrade.attempts+optionAttempts;
   return {upgrade,probability,optionAttempts,attempts,cost:fee===null?null:attempts*fee};
+}
+
+export function mitraPresetExpectations(settings,data) {
+  return [
+    {label:'공/마 30%',threshold:30,allowIed:false},
+    {label:'공/마 21% + 방무',threshold:30,allowIed:true,iedOnly:true,twoLineThreshold:21},
+    {label:'공/마 18% + 방무',threshold:30,allowIed:true,iedOnly:true,twoLineThreshold:18}
+  ].map(preset=>({label:preset.label,attack:goldExpectation({...settings,...preset,item:'mitra',level:200,part:2,stat:'공격력'},data),magic:goldExpectation({...settings,...preset,item:'mitra',level:200,part:2,stat:'마력'},data)}));
 }

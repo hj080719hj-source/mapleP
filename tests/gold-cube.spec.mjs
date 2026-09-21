@@ -4,7 +4,7 @@ test('gold cube equipment buttons, boss cube counts and grade restrictions',asyn
   await page.getByRole('link',{name:'골드 큐브',exact:true}).click();
   await expect(page).toHaveURL(/gold-cube.html$/);
   await expect(page.locator('#cube-price')).toHaveCount(0);
-  await expect(page.locator('#gold-equipment button')).toHaveCount(18);
+  await expect(page.locator('#gold-equipment button')).toHaveCount(19);
   const cost=await page.locator('#mesos-cost').innerText();
   const count=await page.locator('#gold-count').innerText();
   await expect(page.locator('#gold-total')).toContainText('확인 필요');
@@ -33,6 +33,11 @@ test('gold cube equipment buttons, boss cube counts and grade restrictions',asyn
   await page.getByText('실제 사용 비용 입력',{exact:true}).click();
   await page.locator('#gold-fee').fill('100000');
   await expect(page.locator('#gold-total')).toContainText('억 메소');
+  await page.getByRole('button',{name:'미트라의 분노',exact:true}).click();
+  await page.locator('#gold-stat').selectOption('공격력');
+  await expect(page.locator('#gold-option-count')).toBeVisible();
+  await page.locator('#gold-stat').selectOption('마력');
+  await expect(page.locator('#gold-option-count')).toBeVisible();
   await page.setViewportSize({width:390,height:844});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.getByRole('link',{name:'장비 기대값',exact:true}).click();

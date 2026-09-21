@@ -1,7 +1,7 @@
-import {ITEMS,LEVELS,PARTS} from './catalog.js';
+import {GOLD_ITEMS,LEVELS,PARTS} from './catalog.js';
 import {equipmentIcon} from './icons.js';
 import {goldExpectation,GRADES,GRADE_NAMES} from './gold-cube-engine.js';
-const $=id=>document.getElementById(id), items=ITEMS.filter(item=>item.level<=200);
+const $=id=>document.getElementById(id), items=GOLD_ITEMS;
 let selectedItem=items[0],part=selectedItem.part,data;
 const fees=new Map();
 const number=value=>value.toLocaleString('ko-KR',{maximumFractionDigits:2});

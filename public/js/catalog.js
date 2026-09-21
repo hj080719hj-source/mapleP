@@ -1,5 +1,5 @@
 export const LEVELS = [140,145,150,160,200,250];
-export const PARTS = {1:'무기',3:'보조무기',6:'모자',7:'상의',9:'하의',10:'신발',11:'장갑',12:'망토',13:'벨트',14:'어깨장식',15:'얼굴장식',16:'눈장식',17:'귀고리',18:'반지',19:'펜던트',20:'기계심장'};
+export const PARTS = {1:'무기',2:'엠블렘',3:'보조무기',6:'모자',7:'상의',9:'하의',10:'신발',11:'장갑',12:'망토',13:'벨트',14:'어깨장식',15:'얼굴장식',16:'눈장식',17:'귀고리',18:'반지',19:'펜던트',20:'기계심장'};
 export const ITEMS = [
   {id:'meister',name:'마이스터링',label:'마이스터링',level:140,part:18},
   {id:'daybreak',name:'데이브레이크 펜던트',label:'데브펜',level:140,part:19},
@@ -28,3 +28,5 @@ export const ITEMS = [
   {id:'blood-wraith',name:'굶주리는 핏빛 원혼',label:'굶주리는 핏빛 원혼',level:250,part:16},
   {id:'destiny',name:'데스티니 무기',label:'데스티니 무기',level:250,part:1,special:true},
 ].map(item=>({...item,shared:!['arcane','astra','eternal-main','eternal-extra','destiny'].includes(item.id)}));
+export const GOLD_ITEMS = [...ITEMS.filter(item=>item.level<=200),
+  {id:'mitra',name:'미트라의 분노',label:'미트라의 분노',level:200,part:2,shared:false}];

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {compareGradeUp,goldExpectation} from '../public/js/gold-cube-engine.js';
 import {gradeUpExpectation,ITEMS} from '../public/js/engine.js';
+import {GOLD_ITEMS} from '../public/js/catalog.js';
 import {readFileSync} from 'node:fs';
 const data=JSON.parse(readFileSync(new URL('../public/data/gold-potential.json',import.meta.url)));
 test('gold cube geometric expectation, no mesos pity, and miracle doubling',()=>{
@@ -24,7 +25,7 @@ test('equipment level affects mesos cost, not required cube count, and rejects i
 });
 test('official gold tables cover all eligible equipment and conserve probability',()=>{
   assert.equal(data.cubeItemId,2711004);
-  for(const item of ITEMS.filter(i=>i.level<=200))for(const part of item.parts||[item.part]) {
+  for(const item of GOLD_ITEMS)for(const part of item.parts||[item.part]) {
     const lines=data.tables[`${part}-${item.level}`];
     assert.equal(lines.length,3);
     for(const line of lines)assert.ok(Math.abs(line.reduce((sum,o)=>sum+o.probability,0)-1)<.001);

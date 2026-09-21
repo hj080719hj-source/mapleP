@@ -6,6 +6,1106 @@
   "cubeItemId": 2711004,
   "grade": 4,
   "tables": {
+    "2-140": [
+      [
+        {
+          "name": "STR +12%",
+          "probability": 0.129032
+        },
+        {
+          "name": "DEX +12%",
+          "probability": 0.129032
+        },
+        {
+          "name": "INT +12%",
+          "probability": 0.129032
+        },
+        {
+          "name": "LUK +12%",
+          "probability": 0.129032
+        },
+        {
+          "name": "공격력 +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "마력 +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "크리티컬 확률 +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "데미지 +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "올스탯 +9%",
+          "probability": 0.129032
+        },
+        {
+          "name": "몬스터 방어율 무시 +35%",
+          "probability": 0.064516
+        },
+        {
+          "name": "몬스터 방어율 무시 +40%",
+          "probability": 0.032258
+        }
+      ],
+      [
+        {
+          "name": "STR +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "DEX +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "INT +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "LUK +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "공격력 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "마력 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "크리티컬 확률 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "데미지 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "올스탯 +6%",
+          "probability": 0.071286
+        },
+        {
+          "name": "몬스터 방어율 무시 +30%",
+          "probability": 0.071286
+        },
+        {
+          "name": "STR +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "DEX +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "INT +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "LUK +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "공격력 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "마력 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "크리티컬 확률 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "데미지 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "올스탯 +9%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "몬스터 방어율 무시 +35%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "몬스터 방어율 무시 +40%",
+          "probability": 6.439e-05
+        }
+      ],
+      [
+        {
+          "name": "STR +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "DEX +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "INT +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "LUK +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "공격력 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "마력 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "크리티컬 확률 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "데미지 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "올스탯 +6%",
+          "probability": 0.071286
+        },
+        {
+          "name": "몬스터 방어율 무시 +30%",
+          "probability": 0.071286
+        },
+        {
+          "name": "STR +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "DEX +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "INT +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "LUK +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "공격력 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "마력 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "크리티컬 확률 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "데미지 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "올스탯 +9%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "몬스터 방어율 무시 +35%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "몬스터 방어율 무시 +40%",
+          "probability": 6.439e-05
+        }
+      ]
+    ],
+    "2-145": [
+      [
+        {
+          "name": "STR +12%",
+          "probability": 0.129032
+        },
+        {
+          "name": "DEX +12%",
+          "probability": 0.129032
+        },
+        {
+          "name": "INT +12%",
+          "probability": 0.129032
+        },
+        {
+          "name": "LUK +12%",
+          "probability": 0.129032
+        },
+        {
+          "name": "공격력 +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "마력 +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "크리티컬 확률 +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "데미지 +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "올스탯 +9%",
+          "probability": 0.129032
+        },
+        {
+          "name": "몬스터 방어율 무시 +35%",
+          "probability": 0.064516
+        },
+        {
+          "name": "몬스터 방어율 무시 +40%",
+          "probability": 0.032258
+        }
+      ],
+      [
+        {
+          "name": "STR +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "DEX +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "INT +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "LUK +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "공격력 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "마력 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "크리티컬 확률 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "데미지 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "올스탯 +6%",
+          "probability": 0.071286
+        },
+        {
+          "name": "몬스터 방어율 무시 +30%",
+          "probability": 0.071286
+        },
+        {
+          "name": "STR +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "DEX +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "INT +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "LUK +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "공격력 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "마력 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "크리티컬 확률 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "데미지 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "올스탯 +9%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "몬스터 방어율 무시 +35%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "몬스터 방어율 무시 +40%",
+          "probability": 6.439e-05
+        }
+      ],
+      [
+        {
+          "name": "STR +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "DEX +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "INT +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "LUK +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "공격력 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "마력 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "크리티컬 확률 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "데미지 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "올스탯 +6%",
+          "probability": 0.071286
+        },
+        {
+          "name": "몬스터 방어율 무시 +30%",
+          "probability": 0.071286
+        },
+        {
+          "name": "STR +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "DEX +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "INT +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "LUK +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "공격력 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "마력 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "크리티컬 확률 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "데미지 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "올스탯 +9%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "몬스터 방어율 무시 +35%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "몬스터 방어율 무시 +40%",
+          "probability": 6.439e-05
+        }
+      ]
+    ],
+    "2-150": [
+      [
+        {
+          "name": "STR +12%",
+          "probability": 0.129032
+        },
+        {
+          "name": "DEX +12%",
+          "probability": 0.129032
+        },
+        {
+          "name": "INT +12%",
+          "probability": 0.129032
+        },
+        {
+          "name": "LUK +12%",
+          "probability": 0.129032
+        },
+        {
+          "name": "공격력 +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "마력 +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "크리티컬 확률 +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "데미지 +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "올스탯 +9%",
+          "probability": 0.129032
+        },
+        {
+          "name": "몬스터 방어율 무시 +35%",
+          "probability": 0.064516
+        },
+        {
+          "name": "몬스터 방어율 무시 +40%",
+          "probability": 0.032258
+        }
+      ],
+      [
+        {
+          "name": "STR +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "DEX +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "INT +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "LUK +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "공격력 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "마력 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "크리티컬 확률 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "데미지 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "올스탯 +6%",
+          "probability": 0.071286
+        },
+        {
+          "name": "몬스터 방어율 무시 +30%",
+          "probability": 0.071286
+        },
+        {
+          "name": "STR +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "DEX +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "INT +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "LUK +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "공격력 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "마력 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "크리티컬 확률 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "데미지 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "올스탯 +9%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "몬스터 방어율 무시 +35%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "몬스터 방어율 무시 +40%",
+          "probability": 6.439e-05
+        }
+      ],
+      [
+        {
+          "name": "STR +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "DEX +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "INT +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "LUK +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "공격력 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "마력 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "크리티컬 확률 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "데미지 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "올스탯 +6%",
+          "probability": 0.071286
+        },
+        {
+          "name": "몬스터 방어율 무시 +30%",
+          "probability": 0.071286
+        },
+        {
+          "name": "STR +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "DEX +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "INT +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "LUK +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "공격력 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "마력 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "크리티컬 확률 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "데미지 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "올스탯 +9%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "몬스터 방어율 무시 +35%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "몬스터 방어율 무시 +40%",
+          "probability": 6.439e-05
+        }
+      ]
+    ],
+    "2-160": [
+      [
+        {
+          "name": "STR +12%",
+          "probability": 0.129032
+        },
+        {
+          "name": "DEX +12%",
+          "probability": 0.129032
+        },
+        {
+          "name": "INT +12%",
+          "probability": 0.129032
+        },
+        {
+          "name": "LUK +12%",
+          "probability": 0.129032
+        },
+        {
+          "name": "공격력 +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "마력 +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "크리티컬 확률 +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "데미지 +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "올스탯 +9%",
+          "probability": 0.129032
+        },
+        {
+          "name": "몬스터 방어율 무시 +35%",
+          "probability": 0.064516
+        },
+        {
+          "name": "몬스터 방어율 무시 +40%",
+          "probability": 0.032258
+        }
+      ],
+      [
+        {
+          "name": "STR +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "DEX +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "INT +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "LUK +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "공격력 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "마력 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "크리티컬 확률 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "데미지 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "올스탯 +6%",
+          "probability": 0.071286
+        },
+        {
+          "name": "몬스터 방어율 무시 +30%",
+          "probability": 0.071286
+        },
+        {
+          "name": "STR +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "DEX +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "INT +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "LUK +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "공격력 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "마력 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "크리티컬 확률 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "데미지 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "올스탯 +9%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "몬스터 방어율 무시 +35%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "몬스터 방어율 무시 +40%",
+          "probability": 6.439e-05
+        }
+      ],
+      [
+        {
+          "name": "STR +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "DEX +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "INT +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "LUK +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "공격력 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "마력 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "크리티컬 확률 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "데미지 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "올스탯 +6%",
+          "probability": 0.071286
+        },
+        {
+          "name": "몬스터 방어율 무시 +30%",
+          "probability": 0.071286
+        },
+        {
+          "name": "STR +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "DEX +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "INT +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "LUK +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "공격력 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "마력 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "크리티컬 확률 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "데미지 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "올스탯 +9%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "몬스터 방어율 무시 +35%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "몬스터 방어율 무시 +40%",
+          "probability": 6.439e-05
+        }
+      ]
+    ],
+    "2-200": [
+      [
+        {
+          "name": "STR +12%",
+          "probability": 0.129032
+        },
+        {
+          "name": "DEX +12%",
+          "probability": 0.129032
+        },
+        {
+          "name": "INT +12%",
+          "probability": 0.129032
+        },
+        {
+          "name": "LUK +12%",
+          "probability": 0.129032
+        },
+        {
+          "name": "공격력 +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "마력 +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "크리티컬 확률 +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "데미지 +12%",
+          "probability": 0.064516
+        },
+        {
+          "name": "올스탯 +9%",
+          "probability": 0.129032
+        },
+        {
+          "name": "몬스터 방어율 무시 +35%",
+          "probability": 0.064516
+        },
+        {
+          "name": "몬스터 방어율 무시 +40%",
+          "probability": 0.032258
+        }
+      ],
+      [
+        {
+          "name": "STR +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "DEX +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "INT +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "LUK +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "공격력 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "마력 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "크리티컬 확률 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "데미지 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "올스탯 +6%",
+          "probability": 0.071286
+        },
+        {
+          "name": "몬스터 방어율 무시 +30%",
+          "probability": 0.071286
+        },
+        {
+          "name": "STR +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "DEX +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "INT +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "LUK +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "공격력 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "마력 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "크리티컬 확률 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "데미지 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "올스탯 +9%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "몬스터 방어율 무시 +35%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "몬스터 방어율 무시 +40%",
+          "probability": 6.439e-05
+        }
+      ],
+      [
+        {
+          "name": "STR +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "DEX +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "INT +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "LUK +9%",
+          "probability": 0.142572
+        },
+        {
+          "name": "공격력 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "마력 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "크리티컬 확률 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "데미지 +9%",
+          "probability": 0.071286
+        },
+        {
+          "name": "올스탯 +6%",
+          "probability": 0.071286
+        },
+        {
+          "name": "몬스터 방어율 무시 +30%",
+          "probability": 0.071286
+        },
+        {
+          "name": "STR +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "DEX +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "INT +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "LUK +12%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "공격력 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "마력 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "크리티컬 확률 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "데미지 +12%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "올스탯 +9%",
+          "probability": 0.00025749999999999997
+        },
+        {
+          "name": "몬스터 방어율 무시 +35%",
+          "probability": 0.00012880000000000001
+        },
+        {
+          "name": "몬스터 방어율 무시 +40%",
+          "probability": 6.439e-05
+        }
+      ]
+    ],
     "1-140": [
       [
         {

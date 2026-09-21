@@ -1,12 +1,14 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>골드 큐브 등업 비용 · 메이플유</title><link rel="icon" href="./favicon.svg"><link rel="stylesheet" href="./theme.css"><link rel="stylesheet" href="./layout.css"><script type="module" src="./js/gold-cube.js"></script></head>
 <body><a class="skip" href="#main">본문으로 이동</a><header class="sidebar"><a class="brand" href="./"><img src="./favicon.svg" alt="" width="38" height="38"><span>메이플유<small>MAPLE YOU</small></span></a><nav class="calculator-tabs" aria-label="계산기"><a href="./">장비 기대값</a><a href="./gold-cube.html" aria-current="page">골드 큐브</a></nav></header>
-<main id="main" class="gold-page"><section class="hero"><div><h1>골드 큐브 등업 비용</h1><p class="subtitle">200제 미만 장비 · 골드 큐브와 메소 재설정 등업 비용 비교</p></div></section>
+<main id="main" class="gold-page"><section class="hero"><div><h1>골드 큐브 기대값</h1><p class="subtitle">200제 이하 장비 · 등업부터 목표 옵션까지 필요한 평균 큐브 수</p></div></section>
 <div class="gold-layout"><form id="gold-form" class="card gold-form">
-<h2>장비 선택</h2><div id="gold-equipment" class="equipment-grid" aria-label="렙제별 장비 선택"></div><h2>등업 조건</h2>
+<h2>장비 선택</h2><div id="gold-equipment" class="equipment-grid" aria-label="렙제별 장비 선택"></div><div id="gold-parts" class="chips" aria-label="장비 부위"></div><h2>등업 조건</h2>
 <div class="gold-grade-fields"><label class="field" for="start-grade">시작 등급<select id="start-grade"></select></label><label class="field" for="target-grade">목표 등급<select id="target-grade"></select></label></div>
+<h2>목표 잠재능력</h2><div class="gold-grade-fields"><label class="field" for="gold-stat">목표 옵션<select id="gold-stat"></select></label><label class="field" for="gold-threshold">목표 합계 이상<select id="gold-threshold"></select></label></div><p id="gold-option-hint" class="hint"></p>
 <p class="hint">보스에서 획득한 골드 큐브 기준으로 필요한 평균 개수를 계산합니다.</p>
 <label class="check"><input id="gold-miracle" type="checkbox" checked> 미라클 타임 적용</label>
+<details><summary>실제 사용 비용 입력</summary><label class="field" for="gold-fee">골드 큐브 1회 사용 비용 (메소)<input id="gold-fee" type="number" min="0" max="1000000000000" step="1" placeholder="게임에서 확인한 비용"></label><p class="hint">큐브 구매 가격이 아닙니다. 장비별 사용 비용 확인 전까지 자동 금액은 적용하지 않습니다.</p></details>
 </form><section class="card gold-result" aria-live="polite" aria-atomic="true" id="gold-result"></section></div>
-<section class="card gold-breakdown"><h2>등급별 비교</h2><div id="gold-breakdown" class="table-scroll"></div><p class="hint">골드 큐브는 등업 보장 없이 1 ÷ 등업 확률로 계산합니다. 메소 재설정은 천장 누적 0회에서 시작하며 등업 보장을 포함합니다. 미라클 적용 시 두 방식 모두 등업 확률 2배입니다.</p><p class="hint">장비 구입비·목표 옵션 재설정·스타포스 비용은 제외한 평균값입니다. 실제 소모량은 달라질 수 있습니다.</p><a class="text-button" href="https://maplestory.nexon.com/Guide/OtherProbability/cube/artisan" target="_blank" rel="noopener noreferrer">골드 큐브 공식 확률표 ↗</a></section>
+<section class="card gold-breakdown"><h2>등업 구간별 비교</h2><div id="gold-breakdown" class="table-scroll"></div><p class="hint">골드 큐브는 등업 보장 없이 계산합니다. 메소 비교는 등업 비용만이며 천장 누적 0회 기준입니다. 미라클은 등업 확률만 2배로 적용합니다.</p><p class="hint">목표 옵션은 레전드리 등급 기준입니다. 등업 시 생성되는 첫 레전드리 옵션을 포함하며, 기존과 동일한 옵션 재등장 제외는 생략한 근사값입니다. 장비 구입비·스타포스 비용은 제외합니다.</p><a class="text-button" href="https://maplestory.nexon.com/Guide/OtherProbability/cube/artisan" target="_blank" rel="noopener noreferrer">골드 큐브 공식 확률표 ↗</a></section>
 </main><noscript>JavaScript를 켜주세요.</noscript></body></html>

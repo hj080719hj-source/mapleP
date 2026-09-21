@@ -1,6 +1,6 @@
 import {GOLD_ITEMS,LEVELS,PARTS} from './catalog.js';
 import {equipmentIcon} from './icons.js?v=mitra';
-import {goldExpectation,GRADES,GRADE_NAMES} from './gold-cube-engine.js';
+import {goldExpectation,GRADES,GRADE_NAMES} from './gold-cube-engine.js?v=mitra-combination';
 const $=id=>document.getElementById(id), items=GOLD_ITEMS;
 let selectedItem=items[0],part=selectedItem.part,data;
 let loading=true;
@@ -38,12 +38,19 @@ function syncThreshold() {
 }
 function update() {
   const stat=$('gold-stat').value,from=GRADES.indexOf($('start-grade').value);
+  const mitra=selectedItem.id==='mitra'&&['공격력','마력'].includes(stat);
+  const allowIed=mitra&&$('mitra-ied').checked;
+  $('mitra-combination').hidden=!mitra;
+  $('mitra-two-field').hidden=!allowIed;
+  $('mitra-two-threshold').disabled=!allowIed;
+  const combination=allowIed?`${stat} 3줄 합계 ${$('gold-threshold').value}% 이상 또는 ${stat} 2줄 합계 ${$('mitra-two-threshold').value}% 이상 + 방무 1줄` : '';
+  $('mitra-combination-hint').textContent=allowIed?`${combination}. 방무 수치는 무관하며 공격력과 마력은 섞어 세지 않습니다.`:'체크하면 공마 2줄 + 방무 1줄도 성공으로 인정합니다.';
   $('target-grade').disabled=!!stat;
   if(stat) $('target-grade').value='legendary';
   for(const option of $('target-grade').options) option.disabled=GRADES.indexOf(option.value)<from;
   if(GRADES.indexOf($('target-grade').value)<from) $('target-grade').value=GRADES[from];
   try {
-    const result=goldExpectation({item:selectedItem.id,part,level:selectedItem.level,start:$('start-grade').value,target:$('target-grade').value,miracle:$('gold-miracle').checked,stat,threshold:Number($('gold-threshold').value),fee:$('gold-fee').value===''?null:$('gold-fee').valueAsNumber},data);
+    const result=goldExpectation({item:selectedItem.id,part,level:selectedItem.level,start:$('start-grade').value,target:$('target-grade').value,miracle:$('gold-miracle').checked,stat,threshold:Number($('gold-threshold').value),allowIed,twoLineThreshold:Number($('mitra-two-threshold').value),fee:$('gold-fee').value===''?null:$('gold-fee').valueAsNumber},data);
     $('gold-result').innerHTML=`<h2>평균 필요 골드 큐브</h2><p class="gold-total" id="gold-count">${number(result.attempts)}개</p><dl class="metrics"><div><dt>선택 장비</dt><dd>${selectedItem.name}${selectedItem.parts?` · ${PARTS[part]}`:''}</dd></div><div><dt>등업에 필요한 큐브</dt><dd>${number(result.upgrade.attempts)}개</dd></div>${stat?`<div><dt>옵션 재설정 추가 큐브</dt><dd id="gold-option-count">${number(result.optionAttempts)}개</dd></div><div><dt>목표 옵션 등장 확률</dt><dd>${(result.probability*100).toLocaleString('ko-KR',{maximumSignificantDigits:6})}%</dd></div>`:''}<div><dt>골드 큐브 총 사용 비용</dt><dd id="gold-total">${result.cost===null?'1회 사용 비용 확인 필요':money(result.cost)}</dd></div><div><dt>메소 재설정 등업 비용${stat?' · 옵션 제외':''}</dt><dd id="mesos-cost">${money(result.upgrade.mesosCost)}</dd></div></dl><p class="hint">보스 획득 큐브 기준입니다. 비용 미입력 시 무료로 간주하지 않고 개수만 계산합니다.</p>`;
     $('gold-breakdown').innerHTML=result.upgrade.rows.length?`<table><thead><tr><th>등업 구간</th><th>골드 등업 확률</th><th>평균 큐브 수</th><th>메소 재설정 비용</th></tr></thead><tbody>${result.upgrade.rows.map(r=>`<tr><td>${r.name}</td><td>${(r.probability*100).toFixed(4)}%</td><td>${number(r.attempts)}개</td><td>${money(r.mesosCost)}</td></tr>`).join('')}</tbody></table>`:'<p class="hint">시작 등급과 목표 등급이 같아 등업 비용이 없습니다.</p>';
   } catch(error) { $('gold-result').textContent=error.message; $('gold-breakdown').replaceChildren(); }

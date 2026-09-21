@@ -1,10 +1,26 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {compareGradeUp,goldExpectation} from '../public/js/gold-cube-engine.js';
+import {compareGradeUp,goldExpectation,mitraCombinationProbability} from '../public/js/gold-cube-engine.js';
 import {gradeUpExpectation,ITEMS} from '../public/js/engine.js';
 import {GOLD_ITEMS} from '../public/js/catalog.js';
 import {readFileSync} from 'node:fs';
 const data=JSON.parse(readFileSync(new URL('../public/data/gold-potential.json',import.meta.url)));
+test('Mitra union counts three attack or two attack plus one IED, never mixed attack/magic',()=>{
+  const line=['공격력 +12%','마력 +12%','몬스터 방어율 무시 +35%','STR +12%'].map(name=>({name,probability:.25}));
+  assert.equal(mitraCombinationProbability([line,line,line],'공격력',27,21),4/64);
+  assert.equal(mitraCombinationProbability([line,line,line],'마력',27,21),4/64);
+  const low=line.map(o=>({...o,name:o.name.replace('+12%','+9%')}));
+  assert.equal(mitraCombinationProbability([low,low,low],'공격력',27,21),1/64);
+  assert.equal(mitraCombinationProbability([low,low,low],'공격력',27,18),4/64);
+});
+test('Mitra alternative reduces expected rolls, applies selected percent floor, and stays scoped',()=>{
+  const s={item:'mitra',level:200,part:2,start:'legendary',stat:'공격력',threshold:30};
+  const base=goldExpectation(s,data),mixed=goldExpectation({...s,allowIed:true,twoLineThreshold:21},data);
+  assert.ok(mixed.optionAttempts<base.optionAttempts);
+  assert.ok(goldExpectation({...s,allowIed:true,twoLineThreshold:24},data).optionAttempts>mixed.optionAttempts);
+  const other={...s,item:'astra',part:3};
+  assert.equal(goldExpectation({...other,allowIed:true},data).probability,goldExpectation(other,data).probability);
+});
 test('gold cube geometric expectation, no mesos pity, and miracle doubling',()=>{
   const normal=compareGradeUp({start:'unique',miracle:false});
   assert.ok(Math.abs(normal.attempts-1/.001996)<1e-9);

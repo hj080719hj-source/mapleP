@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>골드 큐브 등업 비용 · 메이플유</title><link rel="icon" href="./favicon.svg"><link rel="stylesheet" href="./theme.css"><link rel="stylesheet" href="./layout.css"><script type="module" src="./js/gold-cube.js?v=mitra-2"></script></head>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>골드 큐브 등업 비용 · 메이플유</title><link rel="icon" href="./favicon.svg"><link rel="stylesheet" href="./theme.css"><link rel="stylesheet" href="./layout.css"><script type="module" src="./js/gold-cube.js?v=mitra-combination"></script></head>
 <body><a class="skip" href="#main">본문으로 이동</a><header class="sidebar"><a class="brand" href="./"><img src="./favicon.svg" alt="" width="38" height="38"><span>메이플유<small>MAPLE YOU</small></span></a><nav class="calculator-tabs" aria-label="계산기"><a href="./">장비 기대값</a><a href="./gold-cube.html" aria-current="page">골드 큐브</a></nav></header>
 <main id="main" class="gold-page"><section class="hero"><div><h1>골드 큐브 기대값</h1><p class="subtitle">200제 이하 장비 · 등업부터 목표 옵션까지 필요한 평균 큐브 수</p></div></section>
 <div class="gold-layout"><form id="gold-form" class="card gold-form">
@@ -7,6 +7,7 @@
 <div class="gold-grade-fields"><label class="field" for="start-grade">시작 등급<select id="start-grade"></select></label><label class="field" for="target-grade">목표 등급<select id="target-grade"></select></label></div>
 <h2>목표 잠재능력</h2><div class="gold-grade-fields"><label class="field" for="gold-stat">목표 옵션<select id="gold-stat"></select></label><label class="field" for="gold-threshold">목표 합계 이상<select id="gold-threshold"></select></label></div><p id="gold-option-hint" class="hint"></p><button id="gold-retry" type="button" class="text-button" hidden>확률표 다시 불러오기</button>
 <p class="hint">보스에서 획득한 골드 큐브 기준으로 필요한 평균 개수를 계산합니다.</p>
+<div id="mitra-combination" hidden><label class="check"><input id="mitra-ied" type="checkbox"> 방무 1줄도 허용</label><label id="mitra-two-field" class="field" for="mitra-two-threshold" hidden>방무 1줄 조합의 공마 2줄 합계<select id="mitra-two-threshold"><option value="18">18% 이상</option><option value="21" selected>21% 이상</option><option value="24">24% 이상</option></select></label><p id="mitra-combination-hint" class="hint"></p></div>
 <label class="check"><input id="gold-miracle" type="checkbox" checked> 미라클 타임 적용</label>
 <details><summary>실제 사용 비용 입력</summary><label class="field" for="gold-fee">골드 큐브 1회 사용 비용 (메소)<input id="gold-fee" type="number" min="0" max="1000000000000" step="1" placeholder="게임에서 확인한 비용"></label><p class="hint">큐브 구매 가격이 아닙니다. 장비별 사용 비용 확인 전까지 자동 금액은 적용하지 않습니다.</p></details>
 </form><section class="card gold-result" aria-live="polite" aria-atomic="true" id="gold-result"></section></div>

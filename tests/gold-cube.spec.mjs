@@ -1,11 +1,16 @@
 import {test,expect} from '@playwright/test';
-test('gold cube separate tab, live prices and grade restrictions',async({page})=>{
+test('gold cube equipment buttons, boss cube counts and grade restrictions',async({page})=>{
   await page.goto('/');
   await page.getByRole('link',{name:'골드 큐브',exact:true}).click();
   await expect(page).toHaveURL(/gold-cube.html$/);
-  await expect(page.locator('#gold-total')).toContainText('가격을 입력');
-  await page.locator('#cube-price').fill('100');
-  await expect(page.locator('#gold-total')).toContainText('억 메소');
+  await expect(page.locator('#cube-price')).toHaveCount(0);
+  await expect(page.locator('#gold-equipment button')).toHaveCount(12);
+  const cost=await page.locator('#mesos-cost').innerText();
+  const count=await page.locator('#gold-count').innerText();
+  await page.getByRole('button',{name:'고통의 근원',exact:true}).click();
+  await expect(page.getByRole('button',{name:'고통의 근원',exact:true})).toHaveAttribute('aria-pressed','true');
+  await expect(page.locator('#mesos-cost')).not.toHaveText(cost);
+  await expect(page.locator('#gold-count')).toHaveText(count);
   await page.locator('#start-grade').selectOption('rare');
   await page.locator('#target-grade').selectOption('epic');
   await page.locator('#gold-miracle').uncheck();

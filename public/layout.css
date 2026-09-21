@@ -1,4 +1,7 @@
 /* Compact input workspace and persistent cost summary. */
+.calculator-tabs{display:flex!important;gap:6px;align-items:center}.calculator-tabs a{white-space:nowrap;padding:10px 14px;border-radius:7px;font-size:13px}.calculator-tabs a[aria-current=page]{background:#30200f;color:#ff921e}
+.gold-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}.gold-form{display:grid;gap:18px}.gold-form h2,.gold-result h2,.gold-breakdown h2{font-size:16px;margin:0}.gold-grade-fields{display:grid;grid-template-columns:1fr 1fr;gap:15px}.gold-form .hint{margin:0}.gold-form details .field{margin-top:15px}.gold-total{font-size:clamp(23px,3vw,36px);font-weight:700;color:var(--orange);margin:24px 0}.gold-comparison{padding:16px;background:#23190e;border-radius:8px;color:#efc793;font-size:13px;line-height:1.8}.gold-breakdown{margin:20px 0}.gold-layout>*{min-width:0}.gold-result .metrics>div{flex-wrap:wrap}.gold-page .table-scroll{max-width:100%}
+@media(max-width:760px){.sidebar:has(.calculator-tabs){flex-wrap:wrap;gap:10px;height:auto}.calculator-tabs{margin-left:auto}.calculator-tabs a{font-size:11px;padding:9px}.gold-layout{grid-template-columns:1fr}.gold-grade-fields{gap:10px}}
 .goal-fields>.field[for=start]{grid-column:1/-1}
 .potential-event-choices{display:flex;flex-wrap:wrap;gap:8px}.potential-event-choices>.hint{flex-basis:100%;margin:0}.potential-events>strong{line-height:1.6}
 .price-source{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:-8px;color:var(--muted);font-size:10px;line-height:1.7}

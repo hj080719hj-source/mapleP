@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>골드 큐브 등업 비용 · 메이플유</title><link rel="icon" href="./favicon.svg"><link rel="stylesheet" href="./theme.css"><link rel="stylesheet" href="./layout.css"><script type="module" src="./js/gold-cube.js"></script></head>
+<body><a class="skip" href="#main">본문으로 이동</a><header class="sidebar"><a class="brand" href="./"><img src="./favicon.svg" alt="" width="38" height="38"><span>메이플유<small>MAPLE YOU</small></span></a><nav class="calculator-tabs" aria-label="계산기"><a href="./">장비 기대값</a><a href="./gold-cube.html" aria-current="page">골드 큐브</a></nav></header>
+<main id="main" class="gold-page"><section class="hero"><div><h1>골드 큐브 등업 비용</h1><p class="subtitle">200제 미만 장비 · 골드 큐브와 메소 재설정 등업 비용 비교</p></div></section>
+<div class="gold-layout"><form id="gold-form" class="card gold-form">
+<h2>등업 조건</h2><label class="field" for="item">장비<select id="item"></select></label>
+<div class="gold-grade-fields"><label class="field" for="start-grade">시작 등급<select id="start-grade"></select></label><label class="field" for="target-grade">목표 등급<select id="target-grade"></select></label></div>
+<label class="field" for="cube-price">골드 큐브 1개 가격 (만 메소)<input id="cube-price" type="number" min="0" max="100000000" step="any" placeholder="가격 입력"></label><p class="hint">무료로 얻은 큐브는 0을 입력해주세요.</p>
+<label class="check"><input id="gold-miracle" type="checkbox" checked> 미라클 타임 적용</label>
+<details><summary>추가 비용 설정</summary><label class="field" for="cube-fee">큐브 1회당 추가 비용 (메소)<input id="cube-fee" type="number" min="0" max="1000000000000" step="any" value="0"></label><p class="hint">감정·수수료 등 별도 비용이 있다면 입력해주세요. 기본값은 제외입니다.</p></details>
+</form><section class="card gold-result" aria-live="polite" aria-atomic="true" id="gold-result"></section></div>
+<section class="card gold-breakdown"><h2>등급별 비교</h2><div id="gold-breakdown" class="table-scroll"></div><p class="hint">골드 큐브는 등업 보장 없이 1 ÷ 등업 확률로 계산합니다. 메소 재설정은 천장 누적 0회에서 시작하며 등업 보장을 포함합니다. 미라클 적용 시 두 방식 모두 등업 확률 2배입니다.</p><p class="hint">장비 구입비·목표 옵션 재설정·스타포스 비용은 제외한 평균값입니다. 실제 소모량은 달라질 수 있습니다.</p><a class="text-button" href="https://maplestory.nexon.com/Guide/OtherProbability/cube/artisan" target="_blank" rel="noopener noreferrer">골드 큐브 공식 확률표 ↗</a></section>
+</main><noscript>JavaScript를 켜주세요.</noscript></body></html>

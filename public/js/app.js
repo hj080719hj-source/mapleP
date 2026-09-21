@@ -104,7 +104,7 @@ function additionalDetail(r) {
 
 function shell() {
   $('app').innerHTML = `<a class="skip" href="#main">본문으로 이동</a>
-  <header class="sidebar"><a class="brand" href="./"><img src="./favicon.svg" alt="" width="38" height="38"><span>메이플유<small>MAPLE YOU</small></span></a></header>
+  <header class="sidebar"><a class="brand" href="./"><img src="./favicon.svg" alt="" width="38" height="38"><span>메이플유<small>MAPLE YOU</small></span></a><nav class="calculator-tabs" aria-label="계산기"><a href="./" aria-current="page">장비 기대값</a><a href="./gold-cube.html">골드 큐브</a></nav></header>
   <div class="workspace">
     <main id="main"><section class="hero"><div><p class="eyebrow">MAKE YOUR NEXT UPGRADE COUNT</p><h1>${title}</h1><p class="subtitle">${page === 'guide' ? '계산에 사용한 데이터와 지원 범위를 안내합니다.' : '장비와 목표를 고르면, 완성까지의 평균 비용이 한눈에.'}</p></div><div class="hero-art" aria-hidden="true"><div class="orbit"></div><span class="spark a">✦</span><span class="spark b">✧</span><span class="spark c">✦</span><div class="gem">◇</div><span class="art-label">YOUR NEXT LEVEL</span></div></section>
     <div id="content"></div></main><footer>메이플유는 넥슨과 무관한 비공식 팬 제작 계산기입니다.<br>기대값은 평균이며 실제 소모 메소나 완제품 거래 가격을 보장하지 않습니다.</footer></div><div id="toast" role="status"></div>`;

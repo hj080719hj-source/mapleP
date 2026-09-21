@@ -1,0 +1,20 @@
+import {test,expect} from '@playwright/test';
+test('gold cube separate tab, live prices and grade restrictions',async({page})=>{
+  await page.goto('/');
+  await page.getByRole('link',{name:'골드 큐브',exact:true}).click();
+  await expect(page).toHaveURL(/gold-cube.html$/);
+  await expect(page.locator('#gold-total')).toContainText('가격을 입력');
+  await page.locator('#cube-price').fill('100');
+  await expect(page.locator('#gold-total')).toContainText('억 메소');
+  await page.locator('#start-grade').selectOption('rare');
+  await page.locator('#target-grade').selectOption('epic');
+  await page.locator('#gold-miracle').uncheck();
+  await expect(page.locator('#gold-count')).toHaveText('12.5개');
+  await page.locator('#start-grade').selectOption('unique');
+  await expect(page.locator('#target-grade')).toHaveValue('legendary');
+  await expect(page.locator('#gold-breakdown tbody tr')).toHaveCount(1);
+  await page.setViewportSize({width:390,height:844});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.getByRole('link',{name:'장비 기대값',exact:true}).click();
+  await expect(page).toHaveURL(/\/$/);
+});

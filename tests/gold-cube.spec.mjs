@@ -34,6 +34,9 @@ test('gold cube equipment buttons, boss cube counts and grade restrictions',asyn
   await page.locator('#gold-fee').fill('100000');
   await expect(page.locator('#gold-total')).toContainText('억 메소');
   await page.getByRole('button',{name:'미트라의 분노',exact:true}).click();
+  const icon=page.locator('[data-item=mitra] img');
+  await expect(icon).toBeVisible();
+  await expect.poll(()=>icon.evaluate(img=>img.naturalWidth)).toBeGreaterThan(0);
   await page.locator('#gold-stat').selectOption('공격력');
   await expect(page.locator('#gold-option-count')).toBeVisible();
   await page.locator('#gold-stat').selectOption('마력');
@@ -42,4 +45,20 @@ test('gold cube equipment buttons, boss cube counts and grade restrictions',asyn
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.getByRole('link',{name:'장비 기대값',exact:true}).click();
   await expect(page).toHaveURL(/\/$/);
+});
+test('gold options recover after a failed probability download',async({page})=>{
+  let fail=true;
+  await page.route('**/data/gold-potential.json*',async route=>{
+    if(fail)await route.fulfill({status:503,body:'Unavailable'});
+    else await route.continue();
+  });
+  await page.goto('/gold-cube.html');
+  await page.locator('[data-item=mitra]').click();
+  await expect(page.locator('#gold-retry')).toBeVisible();
+  await expect(page.locator('#gold-stat')).toBeDisabled();
+  fail=false;
+  await page.locator('#gold-retry').click();
+  await expect(page.locator('#gold-stat')).toBeEnabled();
+  await page.locator('#gold-stat').selectOption('공격력');
+  await expect(page.locator('#gold-option-count')).toBeVisible();
 });

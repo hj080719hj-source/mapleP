@@ -1,8 +1,9 @@
 import {GOLD_ITEMS,LEVELS,PARTS} from './catalog.js';
-import {equipmentIcon} from './icons.js';
+import {equipmentIcon} from './icons.js?v=mitra';
 import {goldExpectation,GRADES,GRADE_NAMES} from './gold-cube-engine.js';
 const $=id=>document.getElementById(id), items=GOLD_ITEMS;
 let selectedItem=items[0],part=selectedItem.part,data;
+let loading=true;
 const fees=new Map();
 const number=value=>value.toLocaleString('ko-KR',{maximumFractionDigits:2});
 const money=value=>`${number(value/1e8)}억 메소`;
@@ -13,6 +14,14 @@ $('target-grade').innerHTML=options.join('');
 $('start-grade').value='epic'; $('target-grade').value='legendary';
 function syncGoals() {
   const old=$('gold-stat').value, lines=data?.tables?.[`${part}-${selectedItem.level}`];
+  $('gold-stat').disabled=!lines;
+  if(!lines) {
+    $('gold-stat').innerHTML=`<option value="">${loading?'옵션 확률 불러오는 중…':'옵션 확률을 불러오지 못했습니다'}</option>`;
+    $('gold-threshold').innerHTML='<option value="">목표 옵션을 먼저 선택해주세요</option>';
+    $('gold-threshold').disabled=true;
+    $('gold-option-hint').textContent=loading?'잠시만 기다려주세요. 확률표를 불러오면 옵션을 선택할 수 있습니다.':'확률표 다시 불러오기를 눌러주세요.';
+    return;
+  }
   const available=['','주스탯','올스탯','공격력','마력','쿨타임 감소','크리티컬 데미지'].filter(stat=>!stat||lines?.some(line=>line.some(o=>o.name.startsWith(stat==='주스탯'?'STR +':stat==='쿨타임 감소'?'스킬 재사용 대기시간 -':`${stat} +`))));
   $('gold-stat').innerHTML=available.map(stat=>`<option value="${stat}">${stat||'선택 없음 · 등업만'}</option>`).join('');
   $('gold-stat').value=available.includes(old)?old:'';
@@ -53,8 +62,16 @@ $('gold-parts').addEventListener('click',event=>{const button=event.target.close
 $('gold-form').addEventListener('change',event=>{if(event.target.id==='gold-stat')syncThreshold();update();});
 $('gold-fee').addEventListener('input',()=>{fees.set(`${selectedItem.id}-${part}`,$('gold-fee').value);update();});
 $('gold-form').addEventListener('submit',event=>event.preventDefault());
-syncGoals();update();
-try {
-  const response=await fetch(new URL('../data/gold-potential.json',import.meta.url));
-  if(!response.ok)throw new Error();data=await response.json();syncGoals();update();
-} catch { $('gold-option-hint').textContent='옵션 확률표를 불러오지 못했습니다. 새로고침해주세요. 등업 계산은 사용할 수 있습니다.'; }
+async function loadData() {
+  loading=true;$('gold-retry').hidden=true;syncGoals();update();
+  try {
+    const response=await fetch(new URL('../data/gold-potential.json?v=mitra-2',import.meta.url),{cache:'no-cache'});
+    if(!response.ok)throw new Error();
+    const next=await response.json();
+    for(const item of items)for(const p of item.parts||[item.part])if(next.tables?.[`${p}-${item.level}`]?.length!==3)throw new Error();
+    data=next;
+  } catch {data=undefined;$('gold-retry').hidden=false;}
+  loading=false;syncGoals();update();
+}
+$('gold-retry').addEventListener('click',loadData);
+await loadData();

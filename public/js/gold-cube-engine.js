@@ -4,6 +4,16 @@ export const GRADES = ['rare','epic','unique','legendary'];
 export const GRADE_NAMES = ['레어','에픽','유니크','레전드리'];
 // Nexon: Guide/OtherProbability/cube/artisan. Gold cubes have no mesos-reroll pity.
 export const GOLD_RATES = [.079994,.016959,.001996];
+export function hasAttackPercent(lines) {
+  return !!lines?.some(line=>line.some(o=>o.probability>0 && /^(공격력|마력) \+\d+%$/.test(o.name)));
+}
+export function statPresetExpectations(settings,data) {
+  const presets=[27,30,33,36].map(threshold=>({label:`주스탯 ${threshold}% 이상`,stat:'주스탯',threshold}));
+  // Preserve equipment-specific options alongside the automatic main-stat comparison.
+  if(settings.part===6)presets.push(...[1,2,3,4,5,6].map(threshold=>({label:`쿨타임 감소 ${threshold}초 이상`,stat:'쿨타임 감소',threshold})));
+  if(settings.part===11)presets.push(...[8,16,24].map(threshold=>({label:`크리티컬 데미지 ${threshold}% 이상`,stat:'크리티컬 데미지',threshold})));
+  return presets.map(preset=>({...preset,result:goldExpectation({...settings,...preset,allowIed:false},data)}));
+}
 export function mitraCombinationProbability(lines,stat,threeLineThreshold,twoLineThreshold) {
   if(!['공격력','마력'].includes(stat)||!Array.isArray(lines)||lines.length!==3||![18,21,24].includes(twoLineThreshold)) throw new Error('미트라 유효 옵션 조건을 확인해주세요.');
   // All successful outcomes contain only attack/magic and IED: none of the

@@ -1,6 +1,6 @@
 import {GOLD_ITEMS,LEVELS,PARTS} from './catalog.js';
 import {equipmentIcon} from './icons.js?v=mitra';
-import {goldExpectation,mitraPresetExpectations,GRADES,GRADE_NAMES} from './gold-cube-engine.js?v=mitra-presets';
+import {goldExpectation,mitraPresetExpectations,statPresetExpectations,hasAttackPercent,GRADES,GRADE_NAMES} from './gold-cube-engine.js?v=stat-presets';
 const $=id=>document.getElementById(id), items=GOLD_ITEMS;
 let selectedItem=items[0],part=selectedItem.part,data;
 let loading=true;
@@ -37,9 +37,22 @@ function syncThreshold() {
   $('gold-option-hint').textContent=!stat?'목표 옵션을 선택하면 레전드리 옵션 달성까지 계산합니다.':stat==='주스탯'?(selectedItem.shared?'공용 장비: STR·DEX·INT·LUK 중 한 스탯이 목표에 도달하면 성공. 올스탯% 포함.':'직업 전용 장비: 한 주스탯을 저격합니다. 올스탯% 포함.'):'선택한 옵션의 세 줄 합계를 계산합니다.';
 }
 function update() {
+  const lines=data?.tables?.[`${part}-${selectedItem.level}`];
+  const statFixed=!!lines && !hasAttackPercent(lines);
   const fixed=selectedItem.id==='mitra';
-  $('gold-custom-goal').hidden=fixed;
+  $('gold-custom-goal').hidden=fixed||statFixed;
   $('mitra-presets-note').hidden=!fixed;
+  if(statFixed) {
+    $('mitra-combination').hidden=true;
+    $('target-grade').value='legendary';$('target-grade').disabled=true;
+    try {
+      const rows=statPresetExpectations({item:selectedItem.id,part,level:selectedItem.level,start:$('start-grade').value,miracle:$('gold-miracle').checked,fee:$('gold-fee').value===''?null:$('gold-fee').valueAsNumber},data);
+      $('gold-result').innerHTML=`<h2>${selectedItem.name}${selectedItem.parts?` · ${PARTS[part]}`:''}</h2><p class="hint">${selectedItem.shared?'공용 장비: STR·DEX·INT·LUK 중 한 스탯이 목표에 도달하면 성공.':'직업 전용 장비: 한 주스탯을 저격하는 기준.'} 올스탯% 포함.</p><div id="stat-preset-results">${rows.map(row=>`<section class="mitra-preset" data-stat="${row.stat}"><h3>${row.label}</h3><strong class="gold-total">${number(row.result.attempts)}개</strong><p class="hint">등업 ${number(row.result.upgrade.attempts)}개 + 옵션 추가 ${number(row.result.optionAttempts)}개</p><p class="hint">사용 비용: ${row.result.cost===null?'1회 사용 비용 확인 필요':money(row.result.cost)}</p></section>`).join('')}</div>`;
+      const upgrade=rows[0].result.upgrade;
+      $('gold-breakdown').innerHTML=upgrade.rows.length?`<dl class="metrics">${upgrade.rows.map(row=>`<div><dt>${row.name}</dt><dd>${number(row.attempts)}개</dd></div>`).join('')}</dl>`:'<p class="hint">이미 레전드리이므로 옵션 재설정만 계산합니다.</p>';
+    }catch(error){$('gold-result').textContent=error.message;$('gold-breakdown').replaceChildren();}
+    return;
+  }
   if(fixed) {
     $('mitra-combination').hidden=true;
     $('target-grade').value='legendary';$('target-grade').disabled=true;

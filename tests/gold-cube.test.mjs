@@ -1,10 +1,21 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {compareGradeUp,goldExpectation,mitraCombinationProbability,mitraPresetExpectations} from '../public/js/gold-cube-engine.js';
+import {compareGradeUp,goldExpectation,mitraCombinationProbability,mitraPresetExpectations,statPresetExpectations,hasAttackPercent} from '../public/js/gold-cube-engine.js';
 import {gradeUpExpectation,ITEMS} from '../public/js/engine.js';
 import {GOLD_ITEMS} from '../public/js/catalog.js';
 import {readFileSync} from 'node:fs';
 const data=JSON.parse(readFileSync(new URL('../public/data/gold-potential.json',import.meta.url)));
+test('automatic stat presets cover non-attack equipment, with increasing expectations',()=>{
+  for(const item of GOLD_ITEMS)for(const part of item.parts||[item.part]) {
+    if(hasAttackPercent(data.tables[`${part}-${item.level}`]))continue;
+    const rows=statPresetExpectations({item:item.id,part,level:item.level,start:'legendary'},data);
+    assert.deepEqual(rows.slice(0,4).map(r=>r.threshold),[27,30,33,36]);
+    rows.forEach(r=>assert.ok(Number.isFinite(r.result.attempts)&&r.result.attempts>0));
+    for(let i=1;i<4;i++)assert.ok(rows[i].result.attempts>rows[i-1].result.attempts);
+  }
+  assert.equal(hasAttackPercent([[{name:'공격력 +10',probability:1}]]),false);
+  assert.equal(hasAttackPercent(data.tables['2-200']),true);
+});
 test('fixed Mitra presets evaluate IED-only combinations separately from pure attack',()=>{
   const rows=mitraPresetExpectations({start:'legendary'},data);
   assert.equal(rows.length,3);

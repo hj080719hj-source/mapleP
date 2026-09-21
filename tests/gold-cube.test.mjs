@@ -19,3 +19,13 @@ test('equipment level affects mesos cost, not required cube count, and rejects i
   assert.throws(()=>compareGradeUp({level:200}));
   assert.throws(()=>compareGradeUp({start:'unique',target:'epic'}));
 });
+test('appraisal estimate follows equipment level and is deducted from savings',()=>{
+  for(const [level,fee] of [[140,392000],[145,420500],[150,450000],[160,512000]]) {
+    const r=compareGradeUp({level});
+    assert.equal(r.appraisalFee,fee);
+    assert.equal(r.appraisalCost,r.attempts*fee);
+    assert.equal(r.savings,r.mesosCost-r.appraisalCost);
+    assert.ok(Math.abs(r.rows.reduce((sum,row)=>sum+row.appraisalCost,0)-r.appraisalCost)<1e-6);
+    assert.equal(compareGradeUp({level,miracle:false}).appraisalCost,r.appraisalCost*2);
+  }
+});

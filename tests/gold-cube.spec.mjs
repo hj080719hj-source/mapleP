@@ -7,10 +7,12 @@ test('gold cube equipment buttons, boss cube counts and grade restrictions',asyn
   await expect(page.locator('#gold-equipment button')).toHaveCount(12);
   const cost=await page.locator('#mesos-cost').innerText();
   const count=await page.locator('#gold-count').innerText();
+  await expect(page.locator('#appraisal-fee')).toHaveText('392,000 메소');
   await page.getByRole('button',{name:'고통의 근원',exact:true}).click();
   await expect(page.getByRole('button',{name:'고통의 근원',exact:true})).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('#mesos-cost')).not.toHaveText(cost);
   await expect(page.locator('#gold-count')).toHaveText(count);
+  await expect(page.locator('#appraisal-fee')).toHaveText('512,000 메소');
   await page.locator('#start-grade').selectOption('rare');
   await page.locator('#target-grade').selectOption('epic');
   await page.locator('#gold-miracle').uncheck();

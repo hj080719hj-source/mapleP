@@ -1,5 +1,6 @@
-import {GOLD_ITEMS,PARTS} from './catalog.js?v=michaela';
-import {equipmentIcon} from './icons.js?v=michaela';
+import {GOLD_ITEMS,PARTS} from './catalog.js?v=cube-fees';
+import {equipmentIcon} from './icons.js?v=cube-fees';
+import {GOLD_CUBE_FEES} from './cube-fees.js';
 import {goldExpectation,mitraPresetExpectations,statPresetExpectations,lootPresetExpectations,silverPresetExpectations,hasAttackPercent,GRADES,GRADE_NAMES} from './gold-cube-engine.js?v=silver';
 const $=id=>document.getElementById(id), items=GOLD_ITEMS;
 const LEVELS=[...new Set(items.map(item=>item.level))].sort((a,b)=>a-b);
@@ -104,7 +105,7 @@ function update() {
   } catch(error) { $('gold-result').textContent=error.message; $('gold-breakdown').replaceChildren(); }
 }
 function switchEquipment() {
-  $('gold-fee').value=fees.get(`${cube}-${selectedItem.id}-${part}`)??'';
+  $('gold-fee').value=fees.get(`${cube}-${selectedItem.id}-${part}`)??(cube==='gold'?GOLD_CUBE_FEES[selectedItem.id]??'':'');
   syncGoals();update();
 }
 $('gold-equipment').addEventListener('click',event=>{
@@ -138,4 +139,5 @@ async function loadData() {
   loading=false;syncGoals();update();
 }
 $('gold-retry').addEventListener('click',loadData);
+$('gold-fee').value=GOLD_CUBE_FEES[selectedItem.id]??'';
 await loadData();

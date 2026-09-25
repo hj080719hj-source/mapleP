@@ -4,7 +4,7 @@ test('gold cube equipment buttons, boss cube counts and grade restrictions',asyn
   await page.getByRole('link',{name:'큐브 기대값',exact:true}).click();
   await expect(page).toHaveURL(/gold-cube.html$/);
   await expect(page.locator('#cube-price')).toHaveCount(0);
-  await expect(page.locator('#gold-equipment button')).toHaveCount(20);
+  await expect(page.locator('#gold-equipment button')).toHaveCount(21);
   await expect(page.locator('#gold-custom-goal')).toBeHidden();
   const main=page.locator('#stat-preset-results .mitra-preset');
   await expect(main).toHaveCount(4);
@@ -76,4 +76,24 @@ test('silver switch uses unique goals and hides legendary loot presets',async({p
   await expect(page.locator('#silver-preset-results .mitra-preset')).toHaveCount(10);
   await page.setViewportSize({width:390,height:844});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+test('confirmed gold usage fees follow equipment, with separate silver and manual values',async({page})=>{
+  await page.goto('/gold-cube.html');
+  await page.locator('#stat-preset-results').waitFor();
+  await expect(page.locator('#gold-fee')).toHaveValue('392000');
+  await expect(page.locator('#stat-preset-results')).not.toContainText('확인 필요');
+  for(const [id,fee] of [['daybreak',392000],['twilight',392000],['loose',512000],['eyepatch',512000],['angel',512000],['command',800000],['genesis',800000],['astra',800000],['mitra',800000],['terror',800000]]) {
+    await page.locator(`[data-item=${id}]`).click();
+    await expect(page.locator('#gold-fee')).toHaveValue(String(fee));
+  }
+  await page.locator('[data-cube=silver]').click();
+  await expect(page.locator('#gold-fee')).toHaveValue('');
+  await page.locator('[data-cube=gold]').click();
+  await expect(page.locator('#gold-fee')).toHaveValue('800000');
+  await page.getByText('1회 사용 비용 확인·수정',{exact:true}).click();
+  await page.locator('#gold-fee').fill('0');
+  await page.locator('[data-item=dreamy]').click();
+  await expect(page.locator('#gold-fee')).toHaveValue('');
+  await page.locator('[data-item=terror]').click();
+  await expect(page.locator('#gold-fee')).toHaveValue('0');
 });

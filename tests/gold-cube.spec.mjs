@@ -4,7 +4,7 @@ test('gold cube equipment buttons, boss cube counts and grade restrictions',asyn
   await page.getByRole('link',{name:'큐브 기대값',exact:true}).click();
   await expect(page).toHaveURL(/gold-cube.html$/);
   await expect(page.locator('#cube-price')).toHaveCount(0);
-  await expect(page.locator('#gold-equipment button')).toHaveCount(21);
+  await expect(page.locator('#gold-equipment button')).toHaveCount(22);
   await expect(page.locator('#gold-custom-goal')).toBeHidden();
   const main=page.locator('#stat-preset-results .mitra-preset');
   await expect(main).toHaveCount(4);
@@ -96,4 +96,17 @@ test('confirmed gold usage fees follow equipment, with separate silver and manua
   await expect(page.locator('#gold-fee')).toHaveValue('');
   await page.locator('[data-item=terror]').click();
   await expect(page.locator('#gold-fee')).toHaveValue('0');
+  await page.locator('[data-item=michaela]').click();
+  await expect(page.locator('#gold-fee')).toHaveValue('0');
+  await expect(page.locator('#stat-preset-results')).toContainText('사용 비용: 0억 메소');
+  await page.locator('[data-item=arcane]').click();
+  await expect(page.locator('#gold-fee')).toHaveValue('800000');
+  await page.locator('[data-part="11"]').click();
+  await expect(page.locator('#gold-fee')).toHaveValue('800000');
+  await page.locator('[data-item=complete]').click();
+  await expect(page.locator('#gold-fee')).toHaveValue('800000');
+  await page.locator('[data-item=dunwitch]').click();
+  await expect(page.locator('#gold-fee')).toHaveValue('450000');
+  await expect(page.locator('#stat-preset-results .mitra-preset')).toHaveCount(10);
+  await expect.poll(()=>page.locator('[data-item=dunwitch] img').evaluate(img=>img.naturalWidth)).toBeGreaterThan(0);
 });

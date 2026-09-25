@@ -29,6 +29,7 @@ export const ITEMS = [
   {id:'destiny',name:'데스티니 무기',label:'데스티니 무기',level:250,part:1,special:true},
 ].map(item=>({...item,shared:!['arcane','astra','eternal-main','eternal-extra','destiny'].includes(item.id)}));
 export const GOLD_ITEMS = [...ITEMS.filter(item=>item.level<=200).map(item=>item.id==='angel'?{...item,name:'여명의 가디언 엔젤 링'}:item),
+  {id:'dunwitch',name:'하이네스 던위치햇',label:'하이네스 던위치햇',level:150,part:6,shared:false},
   {id:'genesis',name:'제네시스 무기',label:'제네시스 무기',level:200,part:1,shared:false},
   {id:'michaela',name:'미카엘라의 새 안경',label:'미카엘라의 새 안경',level:90,part:16,shared:true,loot:true},
   {id:'mitra',name:'미트라의 분노',label:'미트라의 분노',level:200,part:2,shared:false}];

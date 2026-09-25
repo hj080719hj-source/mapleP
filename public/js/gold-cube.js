@@ -1,6 +1,6 @@
-import {GOLD_ITEMS,PARTS} from './catalog.js?v=cube-fees';
-import {equipmentIcon} from './icons.js?v=cube-fees';
-import {GOLD_CUBE_FEES} from './cube-fees.js';
+import {GOLD_ITEMS,PARTS} from './catalog.js?v=dunwitch';
+import {equipmentIcon} from './icons.js?v=dunwitch';
+import {GOLD_CUBE_FEES} from './cube-fees.js?v=dunwitch';
 import {goldExpectation,mitraPresetExpectations,statPresetExpectations,lootPresetExpectations,silverPresetExpectations,hasAttackPercent,GRADES,GRADE_NAMES} from './gold-cube-engine.js?v=silver';
 const $=id=>document.getElementById(id), items=GOLD_ITEMS;
 const LEVELS=[...new Set(items.map(item=>item.level))].sort((a,b)=>a-b);

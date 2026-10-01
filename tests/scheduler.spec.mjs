@@ -39,3 +39,32 @@ test('failed character never appears as incomplete and can retry', async ({ page
   await expect(page.locator('#snapshot')).toContainText('2명 성공');
   await expect(page.locator('#schedule-table td.failed')).toHaveCount(0);
 });
+test('boss revenue follows completion with per-character party size, manual prices and filter-independent totals', async ({ page }) => {
+  await page.route('https://open.api.nexon.com/**', async route => {
+    if (route.request().url().includes('/character/list')) return route.fulfill({ json: { account_list: [{ character_list: people }] } });
+    return route.fulfill({ json: { daily_contents: [], weekly_contents: [], boss_contents: [
+      { content_name: '스우', difficulty: '하드', cycle: '주간', complete_flag: 'true', registration_flag: 'true' },
+      { content_name: '신규보스', difficulty: '노멀', cycle: '주간', complete_flag: 'true', registration_flag: 'true' },
+      { content_name: '윌', difficulty: '하드', cycle: '주간', complete_flag: 'false', registration_flag: 'true' },
+    ] } });
+  });
+  await connect(page);
+  const income = page.locator('#boss-income');
+  await expect(income.locator('[data-income-total="weekly"]')).toHaveText('97,800,000 메소');
+  await expect(income).toContainText('2건은 합계에서 제외');
+  const details = income.locator('.income-characters > details').first(); await details.locator('summary').click();
+  await details.getByRole('combobox', { name: '스우 하드 파티 인원' }).selectOption('6');
+  await expect(income.locator('[data-income-total="weekly"]')).toHaveText('57,050,000 메소');
+  const price = details.getByRole('spinbutton', { name: '신규보스 노멀 결정석 가격' });
+  await price.fill('6000000'); await price.blur();
+  await expect(income.locator('[data-income-total="weekly"]')).toHaveText('63,050,000 메소');
+  await page.locator('#unfinished-only').check();
+  await expect(income.locator('[data-income-total="weekly"]')).toHaveText('63,050,000 메소');
+  await page.locator('#refresh').click(); await expect(page.locator('#refresh')).toBeEnabled();
+  await expect(income.locator('[data-income-total="weekly"]')).toHaveText('63,050,000 메소');
+  await details.getByRole('checkbox', { name: '스우 하드 수익 포함' }).uncheck();
+  await expect(income.locator('[data-income-total="weekly"]')).toHaveText('54,900,000 메소');
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  await page.locator('#disconnect').click(); await expect(income).toBeHidden();
+});

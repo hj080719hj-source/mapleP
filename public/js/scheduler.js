@@ -1,5 +1,7 @@
 import { charactersFrom, koreanDate, scheduleRows } from './scheduler-data.js';
+import { createIncomeView } from './boss-income-ui.js';
 const $ = id => document.getElementById(id);
+const income = createIncomeView($('boss-income'));
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const names = { daily: '일일', weekly: '주간', boss: '보스' };
 let key = '', characters = [], selected = new Set(), entries = [], category = 'all', controller, revision = 0, busy = false;
@@ -24,6 +26,7 @@ async function request(path, params, signal) {
   return response.json();
 }
 function reset() {
+  income.reset();
   revision++; controller?.abort(); key = ''; characters = []; selected.clear(); entries = [];
   $('api-key').value = ''; $('characters').replaceChildren(); $('schedule-table').replaceChildren();
   $('characters-panel').hidden = $('schedule-panel').hidden = $('disconnect').hidden = true;
@@ -36,6 +39,7 @@ function renderCharacters() {
 }
 function options() { return { category, registeredOnly: $('registered-only').checked, unfinishedOnly: $('unfinished-only').checked }; }
 function renderTable() {
+  income.render(entries, snapshotDate);
   if (!entries.length) { $('schedule-table').innerHTML = '<p class="empty-schedule">관리할 캐릭터를 선택하고 조회해주세요.</p>'; return; }
   const rows = scheduleRows(entries, options());
   // Summary follows category/registration filters, independently of the remaining-only view.

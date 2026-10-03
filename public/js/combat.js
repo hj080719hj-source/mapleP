@@ -1,5 +1,5 @@
 import { loadCharacter, loadPractice } from './character-api.js';
-import { MODEL, inputsFromStats, calculateScore, estimateBoss, equipmentOverview, practiceMeasurement, statMap, numberValue } from './combat-model.js';
+import { MODEL, inputsFromStats, calculateScore, estimateBoss, compareBossForecast, equipmentOverview, practiceMeasurement, statMap, numberValue } from './combat-model.js';
 import { createHexaView } from './hexa-ui.js';
 
 const $ = id => document.getElementById(id);
@@ -79,14 +79,28 @@ function renderBoss() {
     $('boss-output').innerHTML = `<p class="error">HEXA 보정을 적용할 수 없습니다. ${esc(projection.ok ? '피해량·측정 시간이 연무장 기록과 다릅니다. 점유율 기준을 확인해주세요.' : projection.message)} 보정을 끄면 입력한 실측값으로 계산합니다.</p>`;
     return;
   }
-  const lower = applyHexa ? estimateBoss({ ...input, totalDamage: input.totalDamage * projection.minMultiplier }) : result;
-  const upper = applyHexa ? estimateBoss({ ...input, totalDamage: input.totalDamage * projection.maxMultiplier }) : result;
+  const comparison = compareBossForecast(input, applyHexa ? projection : {});
+  if (!comparison.ok) { $('boss-output').innerHTML = `<p class="error">${esc(comparison.message)}</p>`; return; }
+  const { lower, upper } = comparison;
   const timeText = value => { const total = Math.ceil(value); return `${fmt(Math.floor(total / 60))}분 ${total % 60}초`; };
   const time = timeText(upper.expectedSeconds) === timeText(lower.expectedSeconds) ? timeText(lower.expectedSeconds) : `${timeText(upper.expectedSeconds)} ~ ${timeText(lower.expectedSeconds)}`;
   const between = (low, high, digits = 1) => Math.abs(high - low) < 1e-9 ? fmt(low, digits) : `${fmt(low, digits)}~${fmt(high, digits)}`;
-  const verdict = lower.meetsTime ? '제한 시간 내 피해량 충족' : upper.meetsTime ? '예상 범위가 제한 시간에 걸쳐 있습니다' : '제한 시간 내 피해량 부족';
+  const verdict = comparison.verdict === 'within' ? '제한 시간 내 피해량 충족' : comparison.verdict === 'uncertain' ? '예상 범위가 제한 시간에 걸쳐 있습니다' : '제한 시간 내 피해량 부족';
   const dps = lower.effectiveDps === upper.effectiveDps ? damageText(lower.effectiveDps) : `${damageText(lower.effectiveDps)}~${damageText(upper.effectiveDps)}`;
-  $('boss-output').innerHTML = `<div class="metric-grid"><div class="metric accent"><span>${applyHexa ? 'HEXA 강화 후 예상 소요 시간' : '입력 조건의 예상 소요 시간'}</span><strong id="boss-estimate">${time}</strong><p class="hint">${verdict}</p></div><div class="metric"><span>제한 시간 대비 피해량</span><strong>${between(lower.coverage * 100, upper.coverage * 100)}%</strong><p class="hint">확률이 아닌 필요 피해량 대비 비율</p></div></div>${applyHexa ? `<p class="hint">현재 코어 기준 ${timeText(result.expectedSeconds)} → 강화 후 ${time}. 동일한 전투 조건과 스킬 사용 횟수를 가정합니다.</p>` : ''}<dl class="stat-list"><div><dt>측정 평균 DPS</dt><dd>${damageText(result.measuredDps)} / 초</dd></div><div><dt>${applyHexa ? 'HEXA·딜 유지율 적용 DPS' : '딜 유지율 적용 DPS'}</dt><dd>${dps} / 초</dd></div><div><dt>시간 내 필요한 평균 DPS</dt><dd>${damageText(result.requiredDps)} / 초</dd></div></dl><p class="notice">측정 대상과 보스의 방어율·속성 내성·레벨·포스 조건이 같다고 가정한 시간입니다. 페이즈 제한·강제 대기·회복·생존은 별도이며, 실제 클리어를 보장하지 않습니다. 이미 측정에 포함된 딜 손실은 유지율에서 중복 적용하지 마세요.</p>`;
+  const goalTitle = comparison.verdict === 'within' ? '남은 시간 여유' : '추가 필요한 데미지';
+  const goalValue = comparison.verdict === 'within'
+    ? `${between(comparison.spareSeconds.min, comparison.spareSeconds.max, 1)}초`
+    : `+${between(comparison.additionalDamagePercent.min, comparison.additionalDamagePercent.max, 2)}%`;
+  const goalNote = comparison.verdict === 'uncertain'
+    ? `일부 예상 구간만 제한 시간을 충족합니다. 최대 ${fmt(comparison.overtimeSeconds.max, 1)}초 초과 ~ ${fmt(comparison.spareSeconds.max, 1)}초 여유입니다.`
+    : comparison.verdict === 'within' ? '입력한 제한 시간에서 예상 소요 시간을 뺀 값입니다.' : '같은 전투 조건에서 현재 적용 DPS 대비 더 필요한 증가율입니다.';
+  const beforeGoal = result.meetsTime ? `강화 전 시간 여유 ${fmt(comparison.baselineGoal.spareSeconds, 1)}초` : `강화 전 추가 데미지 +${fmt(comparison.baselineGoal.additionalDamagePercent, 2)}% 필요`;
+  const saved = comparison.savedSeconds;
+  const savedText = saved.min >= 0 ? `${between(saved.min, saved.max, 2)}초 단축`
+    : saved.max <= 0 ? `${between(-saved.max, -saved.min, 2)}초 증가`
+      : `${fmt(-saved.min, 2)}초 증가 ~ ${fmt(saved.max, 2)}초 단축`;
+  const goalCards = `<div class="boss-progress${applyHexa ? ' metric-grid' : ''}"><div class="metric"><span>${goalTitle}${applyHexa ? ' · HEXA 적용 후' : ''}</span><strong id="boss-goal-gap">${goalValue}</strong><p class="hint">${goalNote}${applyHexa ? ` ${beforeGoal}.` : ''}</p></div>${applyHexa ? `<div class="metric"><span>HEXA 강화 전 → 후</span><strong id="boss-hexa-comparison"><span>${timeText(result.expectedSeconds)}</span> <small>→</small> <span>${time}</span></strong><p class="hint" id="boss-time-saved">${savedText}</p><p class="hint">동일한 전투 조건과 스킬 사용 횟수를 가정합니다.</p></div>` : ''}</div>`;
+  $('boss-output').innerHTML = `<div class="metric-grid"><div class="metric accent"><span>${applyHexa ? 'HEXA 강화 후 예상 소요 시간' : '입력 조건의 예상 소요 시간'}</span><strong id="boss-estimate">${time}</strong><p class="hint">${verdict}</p></div><div class="metric"><span>제한 시간 대비 피해량</span><strong>${between(lower.coverage * 100, upper.coverage * 100)}%</strong><p class="hint">확률이 아닌 필요 피해량 대비 비율</p></div></div>${goalCards}<dl class="stat-list"><div><dt>측정 평균 DPS</dt><dd>${damageText(result.measuredDps)} / 초</dd></div><div><dt>${applyHexa ? 'HEXA·딜 유지율 적용 DPS' : '딜 유지율 적용 DPS'}</dt><dd>${dps} / 초</dd></div><div><dt>시간 내 필요한 평균 DPS</dt><dd>${damageText(result.requiredDps)} / 초</dd></div></dl><p class="notice">측정 대상과 보스의 방어율·속성 내성·레벨·포스 조건이 같다고 가정한 시간입니다. 페이즈 제한·강제 대기·회복·생존은 별도이며, 실제 클리어를 보장하지 않습니다. 이미 측정에 포함된 딜 손실은 유지율에서 중복 적용하지 마세요.</p>`;
 }
 function renderPractice() {
   const measurement = practiceMeasurement(practice);

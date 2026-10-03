@@ -194,3 +194,140 @@ test('int64 피해량의 JS 누적 반올림만 허용하고 실질 초과는 �
   const overflow = sharesFromPractice(rows, record(cores, ['A', 'B', 'C'].map(skill_name => ({ skill_name, damage: 1e308 })), 1e308), '루미너스');
   assert.equal(overflow.matchedShare, 0);
 });
+
+const compositeFixture = () => {
+  const cores = [core('복합 코어', 10, '마스터리 코어', ['첫 공격', '둘째 공격'])];
+  const skills = [skill('첫 공격'), skill('둘째 공격', 10, undefined, 'MP 101 소비, 1200%의 데미지로 6번 공격')];
+  const rows = build(cores, skills);
+  return { cores, skills, rows, row: rows[0] };
+};
+
+test('연결 스킬별 배율과 ID는 코어 내 연결 목록 순서가 바뀌어도 유지된다', () => {
+  const { cores, skills, row } = compositeFixture();
+  assert.equal(row.components.length, 2);
+  approximately(row.components[0].minRatio, 1.1);
+  approximately(row.components[1].minRatio, 1.2);
+  assert.ok(row.components.every(component => component.supported && component.reason));
+  const reordered = build([{ ...cores[0], linked_skill: [...cores[0].linked_skill].reverse() }], skills)[0];
+  assert.deepEqual(Object.fromEntries(row.components.map(component => [component.name, component.id])),
+    Object.fromEntries(reordered.components.map(component => [component.name, component.id])));
+});
+
+test('연결 스킬별 점유율로 복합 코어 범위를 실제 가중 합으로 좁힌다', () => {
+  const { rows, row } = compositeFixture();
+  const [a, b] = row.components;
+  const legacy = planHexa(rows, { [row.id]: { enabled: true, share: 40 } }, 10000);
+  approximately(legacy.minMultiplier, 1.04);
+  approximately(legacy.maxMultiplier, 1.08);
+  const refined = planHexa(rows, { [row.id]: { enabled: true, share: 40, componentShares: { [a.id]: 10, [b.id]: '30' } } }, 10000);
+  assert.equal(refined.ok, true);
+  approximately(refined.minMultiplier, 1.07);
+  approximately(refined.maxMultiplier, 1.07);
+  approximately(refined.minScore, 10700);
+  approximately(refined.ranking[0].minGainPercent, 7);
+  approximately(refined.ranking[0].maxGainPercent, 7);
+  assert.equal(refined.ranking[0].refined, true);
+});
+
+test('연결 스킬의 내부 공격 비중이 없으면 그 스킬의 최소~최대 범위는 유지한다', () => {
+  const { cores, skills } = compositeFixture();
+  skills[1] = skill('둘째 공격', 10, '1000%의 데미지로 6번 공격, 2000%의 데미지로 8번 공격', '1200%의 데미지로 6번 공격, 2600%의 데미지로 8번 공격');
+  const rows = build(cores, skills), row = rows[0], [a, b] = row.components;
+  const result = planHexa(rows, { [row.id]: { enabled: true, share: 40, componentShares: { [a.id]: 10, [b.id]: 30 } } });
+  approximately(result.minMultiplier, 1.07);
+  approximately(result.maxMultiplier, 1.10);
+  const unused = planHexa(rows, { [row.id]: { enabled: true, share: 40, componentShares: { [a.id]: 40, [b.id]: 0 } } });
+  approximately(unused.minMultiplier, 1.04);
+  approximately(unused.maxMultiplier, 1.04);
+});
+
+test('상세 점유율의 누락·공백·알 수 없는 키·잘못된 합은 조용히 기본값으로 대체하지 않는다', () => {
+  const { rows, row } = compositeFixture(), [a, b] = row.components;
+  const cases = [
+    [{ [a.id]: 40 }, 'MISSING_COMPONENT_SHARE', b.id],
+    [{ [a.id]: 40, [b.id]: '' }, 'INVALID_COMPONENT_SHARE', b.id],
+    [{ [a.id]: 40, [b.id]: -1 }, 'INVALID_COMPONENT_SHARE', b.id],
+    [{ [a.id]: 40, [b.id]: Infinity }, 'INVALID_COMPONENT_SHARE', b.id],
+    [{ [a.id]: 40, [b.id]: 101 }, 'INVALID_COMPONENT_SHARE', b.id],
+    [{ [a.id]: 10, [b.id]: 20 }, 'COMPONENT_SHARE_MISMATCH', null],
+    [{ [a.id]: 10, [b.id]: 30, stale: 0 }, 'UNKNOWN_COMPONENT', null],
+    [null, 'INVALID_COMPONENT_SHARES', null],
+    [[], 'INVALID_COMPONENT_SHARES', null],
+  ];
+  for (const [componentShares, code, componentId] of cases) {
+    const result = planHexa(rows, { [row.id]: { enabled: true, share: 40, componentShares } });
+    assert.equal(result.ok, false);
+    assert.equal(result.code, code);
+    assert.equal(result.rowId, row.id);
+    assert.equal(result.componentId, componentId);
+    assert.match(result.message, /복합 코어/);
+    assert.equal(result.errors[0].code, code);
+  }
+});
+
+test('미지원 연결 스킬의 점유율이 0이어도 코어 전체의 지원 제한을 우회하지 못한다', () => {
+  const { cores, skills } = compositeFixture();
+  skills[1].skill_effect_next = null;
+  const rows = build(cores, skills), row = rows[0], [a, b] = row.components;
+  assert.equal(a.supported, true);
+  assert.equal(b.supported, false);
+  assert.ok(b.reason);
+  assert.equal(row.supported, false);
+  const result = planHexa(rows, { [row.id]: { enabled: true, share: 40, componentShares: { [a.id]: 40, [b.id]: 0 } } });
+  assert.equal(result.ok, false);
+  assert.equal(result.code, 'UNSUPPORTED_CORE');
+});
+
+test('연무장 원시 피해량으로 연결 스킬별 점유율을 채우고 정밀 보정에 사용한다', () => {
+  const { rows, row, cores } = compositeFixture(), [a, b] = row.components;
+  const result = sharesFromPractice(rows, record(cores, [
+    { skill_name: '첫 공격', damage: 100, damage_percent: '99' },
+    { skill_name: '둘째 공격', damage: 300, damage_percent: '99' },
+    { skill_name: '미매칭 공격', damage: 600 },
+  ]), '루미너스');
+  assert.equal(result.matchedShare, 40);
+  assert.equal(result.unmatchedShare, 60);
+  assert.equal(result.settings[row.id].enabled, false);
+  assert.deepEqual(result.settings[row.id].componentShares, { [a.id]: 10, [b.id]: 30 });
+  const plan = planHexa(rows, { [row.id]: { ...result.settings[row.id], enabled: true } });
+  assert.equal(plan.ok, true);
+  approximately(plan.minMultiplier, 1.07);
+  approximately(plan.maxMultiplier, 1.07);
+});
+
+test('관측되지 않은 연결 스킬의 점유율도 명시적인 0으로 제공한다', () => {
+  const { rows, row, cores } = compositeFixture(), [a, b] = row.components;
+  const result = sharesFromPractice(rows, record(cores, [{ skill_name: '첫 공격', damage: 100 }, { skill_name: '다른 공격', damage: 900 }]), '루미너스');
+  assert.deepEqual(result.settings[row.id].componentShares, { [a.id]: 10, [b.id]: 0 });
+  assert.equal(result.settings[row.id].share, 10);
+});
+
+test('연결 스킬 이름이 중복이면 정밀 점유율을 이중 배분하지 않는다', () => {
+  const cores = [core('중복 코어', 10, '스킬 코어', ['같은 공격', '같은 공격 강화'])];
+  const rows = build(cores, [skill('같은 공격'), skill('같은 공격 강화')]), row = rows[0];
+  assert.equal(row.supported, false);
+  const result = sharesFromPractice(rows, record(cores, [{ skill_name: '같은 공격', damage: 1000 }]), '루미너스');
+  assert.equal(result.matchedShare, 0);
+  assert.ok(Object.values(result.settings[row.id].componentShares).every(share => share === 0));
+  assert.match(result.warnings.join(' '), /중복/);
+});
+
+test('복합 코어의 연결 스킬 하나가 과거 패치 효과이면 부분 가져오기도 하지 않는다', () => {
+  const { rows, row, cores } = compositeFixture();
+  const practice = record(cores, [{ skill_name: '첫 공격', damage: 100 }, { skill_name: '둘째 공격', damage: 900 }]);
+  practice.characterInfo.skill_object.character_skill[1].skill_effect = '900%의 데미지로 6번 공격';
+  const result = sharesFromPractice(rows, practice, '루미너스');
+  assert.equal(result.matchedShare, 0);
+  assert.equal(result.settings[row.id].share, 0);
+  assert.deepEqual(result.incompatibleIds, [row.id]);
+});
+
+test('복합 코어 int64 반올림으로 점유율이 아주 조금 100을 넘어도 계획은 유효하다', () => {
+  const cores = [core('큰 피해 코어', 10, '스킬 코어', ['A', 'B', 'C'])];
+  const rows = build(cores, ['A', 'B', 'C'].map(name => skill(name))), row = rows[0];
+  const result = sharesFromPractice(rows, record(cores, ['A', 'B', 'C'].map(skill_name => ({ skill_name, damage: '9007199254740995' })), '27021597764222985'), '루미너스');
+  assert.equal(result.settings[row.id].share, 100);
+  const plan = planHexa(rows, { [row.id]: { ...result.settings[row.id], enabled: true } });
+  assert.equal(plan.ok, true);
+  approximately(plan.minMultiplier, 1.1);
+});

@@ -51,6 +51,42 @@ export function estimateBoss({ totalDamage, seconds, hp, limitMinutes, retention
   return { ok: true, measuredDps, effectiveDps, expectedSeconds, requiredDps, coverage, meetsTime: expectedSeconds <= minutes * 60 };
 }
 
+// Project a bounded upgrade without changing the observed measurement itself.
+export function compareBossForecast(input, { minMultiplier = 1, maxMultiplier = 1 } = {}) {
+  const baseline = estimateBoss(input);
+  if (!baseline.ok) return baseline;
+  const minimum = numberValue(minMultiplier), maximum = numberValue(maxMultiplier);
+  if (minimum === null || maximum === null || minimum <= 0 || maximum < minimum) {
+    return { ok: false, message: 'HEXA 보정 배율의 범위를 확인해주세요.' };
+  }
+  const limitSeconds = numberValue(input.limitMinutes) * 60;
+  const project = multiplier => ({
+    ...baseline,
+    effectiveDps: baseline.effectiveDps * multiplier,
+    expectedSeconds: baseline.expectedSeconds / multiplier,
+    coverage: baseline.coverage * multiplier,
+    meetsTime: baseline.expectedSeconds / multiplier <= limitSeconds,
+  });
+  const lower = project(minimum), upper = project(maximum);
+  const gap = forecast => ({
+    additionalDamagePercent: Math.max(0, (forecast.expectedSeconds / limitSeconds - 1) * 100),
+    spareSeconds: Math.max(0, limitSeconds - forecast.expectedSeconds),
+    overtimeSeconds: Math.max(0, forecast.expectedSeconds - limitSeconds),
+  });
+  const baselineGoal = gap(baseline), lowerGoal = gap(lower), upperGoal = gap(upper);
+  const additionalDamagePercent = { min: upperGoal.additionalDamagePercent, max: lowerGoal.additionalDamagePercent };
+  const spareSeconds = { min: lowerGoal.spareSeconds, max: upperGoal.spareSeconds };
+  const overtimeSeconds = { min: upperGoal.overtimeSeconds, max: lowerGoal.overtimeSeconds };
+  const savedSeconds = { min: baseline.expectedSeconds - lower.expectedSeconds, max: baseline.expectedSeconds - upper.expectedSeconds };
+  const calculated = [limitSeconds, lower.effectiveDps, lower.expectedSeconds, lower.coverage, upper.effectiveDps, upper.expectedSeconds, upper.coverage,
+    ...Object.values(baselineGoal), ...Object.values(additionalDamagePercent), ...Object.values(spareSeconds), ...Object.values(overtimeSeconds), ...Object.values(savedSeconds)];
+  if (!calculated.every(Number.isFinite) || [limitSeconds, lower.effectiveDps, lower.expectedSeconds, lower.coverage, upper.effectiveDps, upper.expectedSeconds, upper.coverage].some(value => value <= 0)) {
+    return { ok: false, message: '입력값 또는 HEXA 보정 배율이 계산 가능한 범위를 벗어났습니다.' };
+  }
+  return { ok: true, baseline, lower, upper, limitSeconds, baselineGoal, additionalDamagePercent, spareSeconds, overtimeSeconds, savedSeconds,
+    verdict: lower.meetsTime ? 'within' : upper.meetsTime ? 'uncertain' : 'over' };
+}
+
 export function equipmentOverview(equipment) {
   const equipped = Array.isArray(equipment?.item_equipment) ? equipment.item_equipment : [];
   const presets = [1, 2, 3].map(number => {

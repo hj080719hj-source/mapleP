@@ -78,47 +78,84 @@ export function buildHexaRows(hexa, skills) {
     const names = [...new Set(declared.length ? declared : [name])];
     const linkedNames = [...new Set(names.flatMap(value => [value, withoutEnhancement(value)]))];
     const row = { id: `hexa-${index}`, name, type, level, nextLevel: level === null ? null : Math.min(30, level + 1), linkedNames,
-      effectNames: [], currentEffects: [], nextEffects: [], supported: false, reason: '', minRatio: null, maxRatio: null };
+      effectNames: [], currentEffects: [], nextEffects: [], components: [], supported: false, reason: '', minRatio: null, maxRatio: null };
     const matches = names.map(value => skillList.filter(skill => key(skill?.skill_name) === key(value)));
     row.effectNames = matches.map((list, i) => list.length === 1 ? text(list[0].skill_name) : names[i]);
     row.currentEffects = matches.map(list => list.length === 1 ? text(list[0].skill_effect) : '');
     row.nextEffects = matches.map(list => list.length === 1 ? text(list[0].skill_effect_next) : '');
-    const reject = reason => ({ ...row, reason });
+    row.components = names.map((value, i) => ({ id: `${row.id}-skill-${encodeURIComponent(compact(value))}`,
+      name: row.effectNames[i], minRatio: null, maxRatio: null, supported: false, reason: '' }));
+    const reject = reason => ({ ...row, reason, components: row.components.map(component => component.reason ? component : { ...component, reason }) });
     if (skills?.character_skill_grade !== undefined && String(skills.character_skill_grade) !== '6') return reject('6차 스킬 효과가 필요합니다.');
     if (level === null || !Number.isInteger(level) || level < 1 || level > 30) return reject('코어 레벨을 확인할 수 없습니다.');
     if (level >= 30) return reject('최대 30레벨입니다.');
     const eventLevel = numeric(core?.hexa_core_event_level ?? 0);
     if (eventLevel === null || eventLevel !== 0) return reject('이벤트 코어 레벨이 있어 효과를 자동 계산하지 않습니다.');
-    if (!names.length || matches.some(list => list.length !== 1)) return reject('연결된 스킬 효과를 하나로 확인할 수 없습니다.');
-    const matched = matches.map(list => list[0]);
-    if (matched.some(skill => numeric(skill.skill_level) !== level)) return reject('연결된 스킬과 코어 레벨이 달라 자동 계산하지 않습니다.');
-    if (matched.some(skill => milestone(skill.skill_description, level + 1) || milestone(skill.skill_effect_next, level + 1))) return reject('다음 레벨에 추가 효과가 있어 별도 검증이 필요합니다.');
-    const ratios = matched.map(skill => effectRatio(text(skill.skill_effect), text(skill.skill_effect_next), /강화/u.test(type)));
-    const failed = ratios.find(result => result.reason);
-    if (failed) return reject(failed.reason);
-    const minRatio = Math.min(...ratios.map(result => result.minRatio)), maxRatio = Math.max(...ratios.map(result => result.maxRatio));
+    if (!names.length || new Set(names.map(key)).size !== names.length) return reject('연결된 스킬 이름이 중복되어 효과를 구분할 수 없습니다.');
+    row.components = row.components.map((component, i) => {
+      const list = matches[i];
+      const rejectComponent = reason => ({ ...component, reason });
+      if (list.length !== 1) return rejectComponent('연결된 스킬 효과를 하나로 확인할 수 없습니다.');
+      const skill = list[0];
+      if (numeric(skill.skill_level) !== level) return rejectComponent('연결된 스킬과 코어 레벨이 달라 자동 계산하지 않습니다.');
+      if (milestone(skill.skill_description, level + 1) || milestone(skill.skill_effect_next, level + 1)) return rejectComponent('다음 레벨에 추가 효과가 있어 별도 검증이 필요합니다.');
+      const ratio = effectRatio(text(skill.skill_effect), text(skill.skill_effect_next), /강화/u.test(type));
+      if (ratio.reason) return rejectComponent(ratio.reason);
+      return { ...component, ...ratio, supported: true, reason: ratio.minRatio === ratio.maxRatio
+        ? 'API의 다음 레벨 효과 비교' : '스킬 내부 공격별 증가율 차이를 최소~최대 범위로 계산' };
+    });
+    const failed = row.components.find(component => !component.supported);
+    if (failed) return reject(`${failed.name}: ${failed.reason}`);
+    const minRatio = Math.min(...row.components.map(component => component.minRatio)), maxRatio = Math.max(...row.components.map(component => component.maxRatio));
     return { ...row, supported: true, reason: minRatio === maxRatio ? 'API의 다음 레벨 효과 비교' : '공격별 증가율 차이를 최소~최대 범위로 계산', minRatio, maxRatio };
   });
 }
 
 export function planHexa(rows, settings = {}, baselineScore = null) {
-  const fail = message => ({ ok: false, message });
+  const fail = (message, code = 'INVALID_PLAN', rowId = null, componentId = null) => ({ ok: false, message, code, rowId, componentId,
+    errors: [{ message, code, rowId, componentId }] });
   if (!Array.isArray(rows) || !rows.length) return fail('조회한 HEXA 코어가 없습니다.');
   let totalShare = 0, coveredShare = 0, selectedCount = 0, minAddition = 0, maxAddition = 0;
   const ranking = [];
   for (const row of rows) {
     const setting = settings[row.id] ?? {};
     const share = numeric(setting.share === undefined ? 0 : setting.share);
-    if (share === null || share < 0 || share > 100) return fail('각 코어의 점유율을 0~100% 숫자로 입력해주세요.');
+    if (share === null || share < 0 || share > 100) return fail(`${row.name}: 코어 점유율을 0~100% 숫자로 입력해주세요.`, 'INVALID_SHARE', row.id);
     totalShare += share;
+    let details = null;
+    if (setting.componentShares !== undefined) {
+      const supplied = setting.componentShares;
+      const components = row.components;
+      if (!supplied || typeof supplied !== 'object' || Array.isArray(supplied) || !Array.isArray(components) || !components.length) {
+        return fail(`${row.name}: 연결 스킬별 점유율 형식을 확인해주세요.`, 'INVALID_COMPONENT_SHARES', row.id);
+      }
+      const ids = new Set(components.map(component => component.id));
+      if (ids.size !== components.length || Object.keys(supplied).some(id => !ids.has(id))) {
+        return fail(`${row.name}: 현재 연결 스킬과 맞지 않는 상세 점유율이 있습니다. 상세 입력을 다시 확인해주세요.`, 'UNKNOWN_COMPONENT', row.id);
+      }
+      details = [];
+      for (const component of components) {
+        if (!Object.hasOwn(supplied, component.id)) return fail(`${row.name} · ${component.name}: 점유율을 입력해주세요. 사용하지 않은 스킬은 0을 입력해주세요.`, 'MISSING_COMPONENT_SHARE', row.id, component.id);
+        const componentShare = numeric(supplied[component.id]);
+        if (componentShare === null || componentShare < 0 || componentShare > 100) return fail(`${row.name} · ${component.name}: 스킬 점유율을 0~100% 숫자로 입력해주세요.`, 'INVALID_COMPONENT_SHARE', row.id, component.id);
+        details.push({ component, share: componentShare });
+      }
+      const componentTotal = details.reduce((sum, detail) => sum + detail.share, 0);
+      if (Math.abs(componentTotal - share) > 1e-9) return fail(`${row.name}: 연결 스킬 점유율 합계(${componentTotal}%)가 코어 점유율(${share}%)과 같아야 합니다.`, 'COMPONENT_SHARE_MISMATCH', row.id);
+    }
     if (!setting.enabled) continue;
-    if (!row.supported || !Number.isFinite(row.minRatio) || !Number.isFinite(row.maxRatio) || row.minRatio <= 0 || row.maxRatio < row.minRatio) return fail(`${row.name}: 자동 계산이 지원되지 않는 코어입니다.`);
+    if (!row.supported || !Number.isFinite(row.minRatio) || !Number.isFinite(row.maxRatio) || row.minRatio <= 0 || row.maxRatio < row.minRatio) return fail(`${row.name}: 자동 계산이 지원되지 않는 코어입니다. ${row.reason || ''}`.trim(), 'UNSUPPORTED_CORE', row.id);
+    if (details) {
+      const unsupported = details.find(({ component }) => !component.supported || !Number.isFinite(component.minRatio) || !Number.isFinite(component.maxRatio) || component.minRatio <= 0 || component.maxRatio < component.minRatio);
+      if (unsupported) return fail(`${row.name} · ${unsupported.component.name}: 검증되지 않은 연결 스킬이 있어 계산하지 않습니다.`, 'UNSUPPORTED_COMPONENT', row.id, unsupported.component.id);
+    }
     selectedCount++;
     coveredShare += share;
-    const minContribution = share / 100 * (row.minRatio - 1), maxContribution = share / 100 * (row.maxRatio - 1);
+    const minContribution = details ? details.reduce((sum, detail) => sum + detail.share / 100 * (detail.component.minRatio - 1), 0) : share / 100 * (row.minRatio - 1);
+    const maxContribution = details ? details.reduce((sum, detail) => sum + detail.share / 100 * (detail.component.maxRatio - 1), 0) : share / 100 * (row.maxRatio - 1);
     minAddition += minContribution;
     maxAddition += maxContribution;
-    ranking.push({ id: row.id, name: row.name, share, minContribution, maxContribution,
+    ranking.push({ id: row.id, name: row.name, share, refined: details !== null, minContribution, maxContribution,
       minGainPercent: minContribution * 100, maxGainPercent: maxContribution * 100,
       minMultiplier: 1 + minContribution, maxMultiplier: 1 + maxContribution });
   }
@@ -129,13 +166,14 @@ export function planHexa(rows, settings = {}, baselineScore = null) {
   if (baselineScore !== null && (score === null || score < 0)) return fail('기준 점수를 확인해주세요.');
   const minMultiplier = 1 + minAddition, maxMultiplier = 1 + maxAddition;
   ranking.sort((a, b) => b.minContribution - a.minContribution || b.maxContribution - a.maxContribution);
-  return { ok: true, message: '', minMultiplier, maxMultiplier, coveredShare, totalShare, selectedCount,
+  return { ok: true, message: '', errors: [], minMultiplier, maxMultiplier, coveredShare, totalShare, selectedCount,
     minScore: score === null ? null : score * minMultiplier, maxScore: score === null ? null : score * maxMultiplier, ranking };
 }
 
 export function sharesFromPractice(rows, practice, liveClass) {
   const list = Array.isArray(rows) ? rows : [];
-  const settings = Object.fromEntries(list.map(row => [row.id, { enabled: false, share: 0 }]));
+  const settings = Object.fromEntries(list.map(row => [row.id, { enabled: false, share: 0,
+    componentShares: Object.fromEntries((Array.isArray(row.components) ? row.components : []).map(component => [component.id, 0])) }]));
   const warnings = [], incompatible = new Set();
   const finish = matchedShare => ({ settings, matchedShare, unmatchedShare: Math.max(0, 100 - matchedShare), warnings, incompatibleIds: [...incompatible] });
   const reject = message => { warnings.push(message); list.forEach(row => incompatible.add(row.id)); return finish(0); };
@@ -180,15 +218,26 @@ export function sharesFromPractice(rows, practice, liveClass) {
   statistics.forEach((stat, i) => {
     const name = key(stat?.skill_name);
     if (!name || damages[i] <= 0) return;
-    const matches = list.filter(row => row.linkedNames.some(link => key(link) === name));
+    const matches = list.flatMap(row => (Array.isArray(row.components) ? row.components : [])
+      .filter(component => key(component.name) === name).map(component => ({ row, component })));
     if (matches.length > 1 || duplicateNames.has(name)) {
       warnings.push(`${text(stat.skill_name)}: 중복 매칭되어 점유율에서 제외했습니다.`);
       return;
     }
-    if (matches.length !== 1 || incompatible.has(matches[0].id)) return;
+    if (matches.length !== 1 || incompatible.has(matches[0].row.id)) return;
+    const { row, component } = matches[0];
     const share = damages[i] / total * 100;
-    settings[matches[0].id].share += share;
+    settings[row.id].share += share;
+    settings[row.id].componentShares[component.id] += share;
     matchedShare += share;
   });
+  // Integer parsing may leave a 100% share a few floating-point ULPs above 100.
+  // This only clamps that validated boundary; it does not rescale observed skills.
+  for (const setting of Object.values(settings)) {
+    if (setting.share > 100 && setting.share < 100 + 1e-9) setting.share = 100;
+    for (const id of Object.keys(setting.componentShares)) {
+      if (setting.componentShares[id] > 100 && setting.componentShares[id] < 100 + 1e-9) setting.componentShares[id] = 100;
+    }
+  }
   return finish(Math.min(100, matchedShare));
 }

@@ -106,10 +106,10 @@ export async function loadCharacter({ name, apiKey, signal, onProgress, fetchImp
   }
 
   const errors = [];
-  async function optional(path, label, field) {
+  async function optional(path, label, field, extraParams = {}) {
     onProgress?.(`${label} 정보를 불러오는 중입니다.`);
     try {
-      const data = await request(path, params);
+      const data = await request(path, { ...params, ...extraParams });
       if (!Array.isArray(data?.[field])) throw new Error(`${label} 정보가 제공되지 않았습니다.`);
       return data;
     } catch (error) {
@@ -121,9 +121,10 @@ export async function loadCharacter({ name, apiKey, signal, onProgress, fetchImp
   }
   const equipment = await optional('character/item-equipment', '장비', 'item_equipment');
   const hexa = await optional('character/hexamatrix', 'HEXA 코어', 'character_hexa_core_equipment');
+  const skills = await optional('character/skill', '6차 스킬', 'character_skill', { character_skill_grade: '6' });
   checkCancelled(signal);
   onProgress?.('캐릭터 조회를 완료했습니다.');
-  return { ocid: identity.ocid, basic, stats, equipment, hexa, errors, loadedAt: new Date().toISOString() };
+  return { ocid: identity.ocid, basic, stats, equipment, hexa, skills, errors, loadedAt: new Date().toISOString() };
 }
 
 /** 등록된 가장 최근 연무장 리플레이와 입장 당시 능력치를 함께 조회합니다. */

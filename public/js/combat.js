@@ -1,5 +1,6 @@
 import { loadCharacter, loadPractice } from './character-api.js';
 import { MODEL, inputsFromStats, calculateScore, estimateBoss, equipmentOverview, practiceMeasurement, statMap, numberValue } from './combat-model.js';
+import { createHexaView } from './hexa-ui.js';
 
 const $ = id => document.getElementById(id);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
@@ -7,6 +8,7 @@ const fmt = (value, digits = 0) => Number.isFinite(value) ? value.toLocaleString
 const damageText = value => value >= 1e12 ? `${fmt(value / 1e12, 2)}조` : value >= 1e8 ? `${fmt(value / 1e8, 2)}억` : fmt(value);
 const fieldIds = { minAttack: 'min-attack', maxAttack: 'max-attack', damage: 'damage-stat', bossDamage: 'boss-stat', critRate: 'crit-rate', critDamage: 'crit-damage', ignoreDefense: 'ignore-defense' };
 let apiKey = '', character = null, practice = null, original = null, controller, revision = 0, busy = false;
+let hexaView;
 
 function status(id, message, error = false) { $(id).textContent = message; $(id).className = error ? 'error' : 'hint'; }
 function setBusy(value) {
@@ -21,14 +23,14 @@ function clearPractice() {
   $('practice-record').replaceChildren();
   $('total-damage').value = ''; $('battle-seconds').value = '';
   status('practice-status', '캐릭터 조회 후 연무장 기록을 불러오거나 전투분석 결과를 직접 입력하세요.');
-  renderBoss();
+  hexaView.setPractice(null);
 }
 function clearCharacter() {
   revision++; controller?.abort(); apiKey = ''; character = null; original = null;
   $('combat-api-key').value = ''; $('combat-api-key').required = true;
   $('combat-results').hidden = true; $('combat-results').replaceChildren();
   $('clear-character').hidden = true;
-  $('manual-form').reset(); clearPractice(); renderScore(); setBusy(false);
+  $('manual-form').reset(); clearPractice(); hexaView.reset(); renderScore(); setBusy(false);
 }
 function readInputs() { return Object.fromEntries(Object.entries(fieldIds).map(([key, id]) => [key, $(id).value])); }
 function writeInputs(input) { for (const [key, id] of Object.entries(fieldIds)) $(id).value = input[key] ?? ''; }
@@ -45,11 +47,11 @@ function renderScore() {
     <div class="metric accent"><span>메이플유 자체 환산 · v${MODEL.version}</span><strong id="own-score">${fmt(result.score)}<small> 점</small></strong><p class="hint">${edited ? '직접 수정한 스탯' : character ? '현재 착용 스탯 기준' : '직접 입력한 스탯'}${delta !== null ? ` · 조회값 대비 ${delta >= 0 ? '+' : ''}${fmt(delta, 2)}%` : ''}</p></div>
     <div class="metric"><span>방어율 380% 기준 기대 기본 타격량</span><strong>${damageText(result.basicDamage)}</strong><p class="hint">스킬 배율·타수·공격 주기를 적용하기 전 값</p></div>
   </div>
-  <p class="notice">기존 환산주스탯과 다른 자체 지표입니다. 같은 직업의 전투 스탯 비교에 사용하세요. 스킬 배율·HEXA 코어 레벨·쿨타임·속성 반감·레벨·포스에 대한 별도 보정은 적용하지 않습니다.</p>
+  <p class="notice">기존 환산주스탯과 다른 자체 지표입니다. 같은 직업의 전투 스탯 비교에 사용하세요. 위 HEXA 패널에서 코어 강화 전후를 별도로 비교할 수 있습니다. 기본 점수에는 스킬별 배율·쿨타임·속성 반감·레벨·포스 보정이 없습니다.</p>
   ${edited ? '<p class="hint">수정한 스탯은 과거 연무장 실측 DPS에 적용되지 않습니다. <button type="button" id="restore-stats">조회한 스탯으로 복원</button></p>' : ''}
   ${result.defenseMultiplier === 0 ? '<p class="notice">입력한 방무로는 방어율 380% 대상의 방어를 관통하지 못해 이 기준 점수가 0입니다.</p>' : ''}
   <details><summary>점수 계산 과정</summary><dl class="stat-list"><div><dt>평균 스탯공격력</dt><dd>${fmt(result.averageAttack, 2)}</dd></div><div><dt>보스 데미지 보정</dt><dd>× ${fmt(result.bossMultiplier, 5)}</dd></div><div><dt>크리티컬 기대 배율</dt><dd>× ${fmt(result.criticalMultiplier, 5)}</dd></div><div><dt>방어 관통 배율</dt><dd>× ${fmt(result.defenseMultiplier, 5)}</dd></div></dl><p class="hint">평균 스탯공격력 × (100 + 데미지 + 보공) ÷ (100 + 데미지) × 크리티컬 기대 배율 × 방어 관통 배율 ÷ 10,000. 최종 데미지와 무기 상수는 스탯공격력에 이미 포함되어 다시 곱하지 않습니다. 기대 기본 타격량 1억을 1만점으로 정한 메이플유의 척도이며 DPS가 아닙니다.</p></details>`;
-  $('restore-stats')?.addEventListener('click', () => { writeInputs(original); renderScore(); });
+  $('restore-stats')?.addEventListener('click', () => { writeInputs(original); renderScore(); hexaView.refresh(); });
 }
 function renderCharacter() {
   const { basic, stats, equipment, hexa, errors, loadedAt } = character;
@@ -63,16 +65,28 @@ function renderCharacter() {
   <p class="notice">다른 장비 프리셋은 장비 목록만 비교합니다. 다른 프리셋의 종합 능력치를 조회할 수 없어 환산값을 임의로 계산하지 않습니다.</p>
   ${overview.presets.length ? `<div class="equipment-list">${overview.presets.map(p => `<div><strong>${p.number}번${p.number === overview.preset ? ' · 현재 착용' : ''}</strong><span>장비 ${p.count}개 · 드롭·메소 잠재 장비 ${p.loot}개</span><small>${esc(p.rings.join(' / ') || '특수 스킬 반지 없음')}</small></div>`).join('')}</div>` : ''}</details>
   <details><summary>현재 장비 ${overview.equipped.length}개 보기</summary><ul class="core-list">${overview.equipped.map(item => `<li><span>${esc(item.item_equipment_slot)} · ${esc(item.item_name)}</span><strong>${numberValue(item.starforce) > 0 ? `★ ${esc(item.starforce)}` : ''}</strong></li>`).join('') || '<li>장비 정보를 불러오지 못했습니다.</li>'}</ul></details>
-  <details><summary>HEXA 코어 ${cores.length}개 보기</summary><p class="hint">코어 정보는 조회용입니다. 스킬별 타수·주기와 배율이 필요한 HEXA 환산점수는 생성하지 않습니다. 실제 강화 상태는 연무장 측정 기록에서 확인하세요.</p><ul class="core-list">${cores.map(core => `<li><span>${esc(core.hexa_core_name)}<small>${esc(core.hexa_core_type)}</small></span><strong>Lv.${esc(core.hexa_core_level)}</strong></li>`).join('') || '<li>HEXA 정보가 없거나 불러오지 못했습니다.</li>'}</ul></details>
+  <details><summary>HEXA 코어 ${cores.length}개 보기</summary><p class="hint">아래 HEXA 패널에서 코어별 다음 레벨의 효과와 전체 데미지 변화를 비교할 수 있습니다.</p><ul class="core-list">${cores.map(core => `<li><span>${esc(core.hexa_core_name)}<small>${esc(core.hexa_core_type)}</small></span><strong>Lv.${esc(core.hexa_core_level)}</strong></li>`).join('') || '<li>HEXA 정보가 없거나 불러오지 못했습니다.</li>'}</ul></details>
   ${errors.length ? `<p class="notice">${errors.map(esc).join('<br>')}</p>` : ''}</section>`;
 }
 function renderBoss() {
   const damage = numberValue($('total-damage').value), hp = numberValue($('boss-hp').value);
-  const result = estimateBoss({ totalDamage: damage === null ? null : damage * 1e12, seconds: $('battle-seconds').value, hp: hp === null ? null : hp * 1e12, limitMinutes: $('boss-limit').value, retention: $('uptime').value });
+  const input = { totalDamage: damage === null ? null : damage * 1e12, seconds: $('battle-seconds').value, hp: hp === null ? null : hp * 1e12, limitMinutes: $('boss-limit').value, retention: $('uptime').value };
+  const result = estimateBoss(input);
   if (!result.ok) { $('boss-output').innerHTML = `<p class="hint">${esc(result.message)}</p>`; return; }
-  const minutes = Math.floor(result.expectedSeconds / 60), seconds = Math.ceil(result.expectedSeconds - minutes * 60);
-  const time = seconds === 60 ? `${fmt(minutes + 1)}분 0초` : `${fmt(minutes)}분 ${seconds}초`;
-  $('boss-output').innerHTML = `<div class="metric-grid"><div class="metric accent"><span>입력 조건의 예상 소요 시간</span><strong id="boss-estimate">${time}</strong><p class="hint">${result.meetsTime ? '제한 시간 내 피해량 충족' : '제한 시간 내 피해량 부족'}</p></div><div class="metric"><span>제한 시간 대비 피해량</span><strong>${fmt(result.coverage * 100, 1)}%</strong><p class="hint">확률이 아닌 필요 피해량 대비 비율</p></div></div><dl class="stat-list"><div><dt>측정 평균 DPS</dt><dd>${damageText(result.measuredDps)} / 초</dd></div><div><dt>딜 유지율 적용 DPS</dt><dd>${damageText(result.effectiveDps)} / 초</dd></div><div><dt>시간 내 필요한 평균 DPS</dt><dd>${damageText(result.requiredDps)} / 초</dd></div></dl><p class="notice">측정 대상과 보스의 방어율·속성 내성·레벨·포스 조건이 같다고 가정한 시간입니다. 페이즈 제한·강제 대기·회복·생존은 별도이며, 실제 클리어를 보장하지 않습니다. 이미 측정에 포함된 딜 손실은 유지율에서 중복 적용하지 마세요.</p>`;
+  const projection = hexaView?.getProjection();
+  const applyHexa = projection?.applyBoss && projection.selected > 0;
+  if (applyHexa && (!projection.ok || !projection.consistent)) {
+    $('boss-output').innerHTML = `<p class="error">HEXA 보정을 적용할 수 없습니다. ${esc(projection.ok ? '피해량·측정 시간이 연무장 기록과 다릅니다. 점유율 기준을 확인해주세요.' : projection.message)} 보정을 끄면 입력한 실측값으로 계산합니다.</p>`;
+    return;
+  }
+  const lower = applyHexa ? estimateBoss({ ...input, totalDamage: input.totalDamage * projection.minMultiplier }) : result;
+  const upper = applyHexa ? estimateBoss({ ...input, totalDamage: input.totalDamage * projection.maxMultiplier }) : result;
+  const timeText = value => { const total = Math.ceil(value); return `${fmt(Math.floor(total / 60))}분 ${total % 60}초`; };
+  const time = timeText(upper.expectedSeconds) === timeText(lower.expectedSeconds) ? timeText(lower.expectedSeconds) : `${timeText(upper.expectedSeconds)} ~ ${timeText(lower.expectedSeconds)}`;
+  const between = (low, high, digits = 1) => Math.abs(high - low) < 1e-9 ? fmt(low, digits) : `${fmt(low, digits)}~${fmt(high, digits)}`;
+  const verdict = lower.meetsTime ? '제한 시간 내 피해량 충족' : upper.meetsTime ? '예상 범위가 제한 시간에 걸쳐 있습니다' : '제한 시간 내 피해량 부족';
+  const dps = lower.effectiveDps === upper.effectiveDps ? damageText(lower.effectiveDps) : `${damageText(lower.effectiveDps)}~${damageText(upper.effectiveDps)}`;
+  $('boss-output').innerHTML = `<div class="metric-grid"><div class="metric accent"><span>${applyHexa ? 'HEXA 강화 후 예상 소요 시간' : '입력 조건의 예상 소요 시간'}</span><strong id="boss-estimate">${time}</strong><p class="hint">${verdict}</p></div><div class="metric"><span>제한 시간 대비 피해량</span><strong>${between(lower.coverage * 100, upper.coverage * 100)}%</strong><p class="hint">확률이 아닌 필요 피해량 대비 비율</p></div></div>${applyHexa ? `<p class="hint">현재 코어 기준 ${timeText(result.expectedSeconds)} → 강화 후 ${time}. 동일한 전투 조건과 스킬 사용 횟수를 가정합니다.</p>` : ''}<dl class="stat-list"><div><dt>측정 평균 DPS</dt><dd>${damageText(result.measuredDps)} / 초</dd></div><div><dt>${applyHexa ? 'HEXA·딜 유지율 적용 DPS' : '딜 유지율 적용 DPS'}</dt><dd>${dps} / 초</dd></div><div><dt>시간 내 필요한 평균 DPS</dt><dd>${damageText(result.requiredDps)} / 초</dd></div></dl><p class="notice">측정 대상과 보스의 방어율·속성 내성·레벨·포스 조건이 같다고 가정한 시간입니다. 페이즈 제한·강제 대기·회복·생존은 별도이며, 실제 클리어를 보장하지 않습니다. 이미 측정에 포함된 딜 손실은 유지율에서 중복 적용하지 마세요.</p>`;
 }
 function renderPractice() {
   const measurement = practiceMeasurement(practice);
@@ -86,8 +100,14 @@ function renderPractice() {
   $('total-damage').value = measurement.totalDamage / 1e12;
   $('battle-seconds').value = measurement.seconds;
   $('uptime').value = '100';
-  renderBoss();
+  hexaView.setPractice(practice);
 }
+
+hexaView = createHexaView($('hexa-panel'), {
+  getCurrentScore: () => { const result = calculateScore(readInputs()); return result.ok ? result.score : null; },
+  getMeasurement: () => ({ totalDamage: Number($('total-damage').value) * 1e12, seconds: Number($('battle-seconds').value) }),
+  onChange: renderBoss,
+});
 
 $('character-form').addEventListener('submit', async event => {
   event.preventDefault(); if (busy) return;
@@ -100,6 +120,7 @@ $('character-form').addEventListener('submit', async event => {
     const result = await loadCharacter({ name, apiKey, signal: controller.signal, onProgress: message => { if (current === revision) status('combat-status', message); } });
     if (current !== revision) return;
     character = result; original = inputsFromStats(result.stats); writeInputs(original); renderCharacter(); renderScore();
+    hexaView.setCharacter(result);
     status('combat-status', `${result.basic.character_name}의 스탯을 불러왔습니다. 값을 수정하면 자체 환산이 바로 갱신됩니다.`);
   } catch (error) {
     if (current !== revision) return;
@@ -109,9 +130,9 @@ $('character-form').addEventListener('submit', async event => {
 });
 $('clear-character').addEventListener('click', () => { clearCharacter(); status('combat-status', '연결을 해제하고 API 키·조회 기록을 지웠습니다.'); });
 $('manual-form').addEventListener('submit', event => event.preventDefault());
-$('manual-form').addEventListener('input', renderScore);
+$('manual-form').addEventListener('input', () => { renderScore(); hexaView.refresh(); });
 $('boss-form').addEventListener('submit', event => event.preventDefault());
-$('boss-form').addEventListener('input', () => { if (practice) status('practice-status', '실측 기록은 위에 보존됩니다. 아래 계산에는 입력한 피해량·시간을 사용합니다.'); renderBoss(); });
+$('boss-form').addEventListener('input', () => { if (practice) status('practice-status', '실측 기록은 위에 보존됩니다. 아래 계산에는 입력한 피해량·시간을 사용합니다.'); hexaView.refresh(); });
 $('load-practice').addEventListener('click', async () => {
   if (busy || !character || !apiKey) return;
   const current = revision; controller = new AbortController(); clearPractice(); setBusy(true);
@@ -126,4 +147,4 @@ $('load-practice').addEventListener('click', async () => {
 // No localStorage, sessionStorage, analytics, or service worker handles the key.
 window.addEventListener('pagehide', () => { apiKey = ''; controller?.abort(); $('combat-api-key').value = ''; $('combat-api-key').required = true; });
 window.addEventListener('pageshow', event => { if (event.persisted) { clearCharacter(); status('combat-status', '화면으로 돌아왔습니다. API 키를 다시 연결해주세요.'); } });
-renderScore(); renderBoss();
+renderScore(); hexaView.reset();

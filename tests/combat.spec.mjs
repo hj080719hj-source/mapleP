@@ -46,6 +46,7 @@ async function mockApi(page, options = {}) {
         { hexa_core_name: '앱솔루트 스페이스', hexa_core_level: 18, hexa_core_type: '스킬 코어' },
         { hexa_core_name: '하모닉 패러독스', hexa_core_level: 20, hexa_core_type: '스킬 코어' },
       ] },
+      'character/skill': { character_skill: [] },
       'battle-practice/replay-id': { replay_list: options.noReplay ? [] : [
         { replay_id: 'record-old', register_date: '2026-09-20T12:00:00+09:00', period_no: 7 },
         newestReplay,

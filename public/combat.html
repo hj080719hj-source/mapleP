@@ -44,6 +44,8 @@
 
     <div id="combat-results" hidden></div>
 
+    <section class="card hexa-panel" id="hexa-panel" aria-label="HEXA 코어별 강화 보정"></section>
+
     <div class="combat-workspace">
       <section class="card" id="manual-panel" aria-labelledby="manual-heading">
         <div class="combat-section-heading"><h2 id="manual-heading">직접 스탯 입력</h2><span class="muted">입력하면 자동 계산</span></div>
@@ -82,12 +84,13 @@
       <details>
         <summary>계산 기준과 데이터 출처</summary>
         <p>자체 환산은 평균 스탯공격력에 보스 데미지·크리티컬·방어율 무시를 적용합니다. 방어율 380%를 기준으로 기본 타격량 1억을 1만 점으로 표시하는 메이플유 자체 척도입니다.</p>
-        <p>같은 직업의 스탯 변화를 비교하는 참고 수치입니다. 스탯공격력에 반영된 최종 데미지는 포함되며, 스킬 배율·쿨타임 감소·HEXA 강화에 따른 차이는 점수에 별도로 반영하지 않습니다.</p>
+        <p>같은 직업의 스탯 변화를 비교하는 참고 수치입니다. 스탯공격력에 반영된 최종 데미지는 포함합니다. HEXA 코어는 공식 API의 현재·다음 레벨 효과와 현재 피해 점유율로 강화 전후의 변화량을 계산합니다. 전체 스킬의 절대 배율이나 쿨타임 감소를 환산하는 모델은 아닙니다.</p>
         <p>보스 예상 시간은 측정한 초당 피해량으로 보스 체력을 나눠 계산합니다. 측정 대비 딜 유지율을 낮추면 그만큼 예상 시간이 늘어납니다.</p>
         <div class="source-links">
           <a href="https://openapi.nexon.com/ko/game/maplestory/?id=14" target="_blank" rel="noopener noreferrer">넥슨 캐릭터 스탯 안내 ↗</a>
           <a href="https://openapi.nexon.com/ko/game/maplestory/?id=59" target="_blank" rel="noopener noreferrer">넥슨 API 안내 ↗</a>
           <a href="https://maplestory.nexon.com/Guide/N23GameInformation/Articles/390" target="_blank" rel="noopener noreferrer">메이플스토리 특수 스탯 안내 ↗</a>
+          <a href="https://maplestory.nexon.com/Guide/N23GameInformation/Articles/405" target="_blank" rel="noopener noreferrer">메이플스토리 HEXA 매트릭스 안내 ↗</a>
         </div>
       </details>
     </section>

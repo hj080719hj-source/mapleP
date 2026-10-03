@@ -76,8 +76,33 @@
 .combat-page .good{color:#8cddb5}
 .combat-page .warning{color:#ffc37e}
 .combat-page .bad{color:#f9a899}
+.hexa-panel{display:grid;gap:18px}
+.hexa-toolbar{display:flex;align-items:end;gap:12px;flex-wrap:wrap}
+.hexa-toolbar>.field{flex:1 1 230px;max-width:400px}
+.hexa-rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.hexa-row{display:grid;align-content:start;gap:14px;min-width:0;padding:16px;border:1px solid #44321f;border-radius:9px;background:#13100c}
+.hexa-row-heading{display:flex;align-items:start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hexa-row-heading label{display:flex;align-items:start;gap:10px;font-size:12px;line-height:1.8;min-width:0}
+.hexa-row-heading input,.hexa-apply input{flex:none;margin-top:4px;accent-color:var(--orange);width:16px;height:16px}
+.hexa-row-heading small{display:block;color:var(--muted);font-size:10px}
+.hexa-ratio{color:#9be0b9;font-size:11px;line-height:1.8}
+.hexa-row:has(input:disabled) .hexa-ratio{color:var(--muted)}
+.hexa-share{max-width:230px}
+.hexa-share input[readonly]{background:#1c1914;color:#b8a58a}
+.hexa-effects{display:grid;gap:12px;font-size:10px;color:var(--muted)}
+.hexa-effects pre{font:inherit;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.9;margin:6px 0 0}
+#hexa-result,#hexa-ranking{display:grid;gap:12px}
+#hexa-result:empty,#hexa-ranking:empty{display:none}
+.hexa-rank{margin:0;padding-left:22px;font-size:12px;line-height:2.2}
+.hexa-rank li>strong{margin-left:14px;color:#9be0b9;white-space:nowrap}
+.hexa-apply{display:flex;align-items:start;gap:9px;font-size:12px;line-height:1.9}
+.hexa-panel>details>a{display:inline-block;color:#f7b15e;margin-top:12px;font-size:11px}
 @media(max-width:1000px){.combat-workspace{grid-template-columns:1fr}.combat-summary h2{font-size:18px}}
 @media(max-width:600px){
+  .hexa-rows{grid-template-columns:1fr}
+  .hexa-toolbar>.field{flex-basis:100%;max-width:none}
+  .hexa-toolbar>button{flex:1}
+  .hexa-row{padding:13px}
   .combat-page{gap:14px}
   .combat-workspace{gap:14px}
   .combat-page .connection-card,.combat-workspace>.card{gap:15px}

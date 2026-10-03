@@ -7,8 +7,9 @@ const basic = { character_name: '테스트', character_class: '루미너스', ch
 const stats = { final_stat: [{ stat_name: 'INT', stat_value: '54250' }] };
 const equipment = { preset_no: 3, item_equipment: [] };
 const hexa = { character_hexa_core_equipment: [] };
+const skills = { character_skill_grade: '6', character_skill: [{ skill_name: '앱솔루트 스페이스', skill_level: 18, skill_description: '테스트 스킬 설명' }] };
 const good = [
-  { ocid: 'fake-ocid' }, basic, stats, equipment, hexa,
+  { ocid: 'fake-ocid' }, basic, stats, equipment, hexa, skills,
 ];
 
 function fixture(responses = good) {
@@ -38,14 +39,17 @@ test('character loader preserves raw data and only sends the key to the official
   assert.deepEqual(result.stats, stats);
   assert.deepEqual(result.equipment, equipment);
   assert.deepEqual(result.hexa, hexa);
+  assert.deepEqual(result.skills, skills);
   assert.deepEqual(result.errors, []);
   assert.ok(Number.isFinite(Date.parse(result.loadedAt)));
-  assert.equal(calls.length, 5);
+  assert.equal(calls.length, 6);
   assert.deepEqual(calls.map(call => call.url.pathname), [
     '/maplestory/v1/id', '/maplestory/v1/character/basic', '/maplestory/v1/character/stat',
-    '/maplestory/v1/character/item-equipment', '/maplestory/v1/character/hexamatrix',
+    '/maplestory/v1/character/item-equipment', '/maplestory/v1/character/hexamatrix', '/maplestory/v1/character/skill',
   ]);
   assert.equal(calls[0].url.searchParams.get('character_name'), '테스트');
+  assert.equal(calls[5].url.searchParams.get('character_skill_grade'), '6');
+  assert.equal(calls[5].url.searchParams.get('ocid'), 'fake-ocid');
   for (const [index, { url, options }] of calls.entries()) {
     assert.equal(url.origin, 'https://open.api.nexon.com');
     assert.equal(url.search.includes(fakeKey), false);
@@ -73,11 +77,12 @@ test('missing required identity, basic data, or stats stops before optional requ
 });
 
 test('optional failure preserves required data and explicitly reports missing data', async () => {
-  const { load } = fixture([good[0], basic, stats, http(500), {}]);
+  const { load } = fixture([good[0], basic, stats, http(500), {}, skills]);
   const result = await load();
   assert.deepEqual(result.stats, stats);
   assert.equal(result.equipment, null);
   assert.equal(result.hexa, null);
+  assert.deepEqual(result.skills, skills);
   assert.equal(result.errors.length, 2);
   assert.match(result.errors[0], /^장비: .*서버/);
   assert.match(result.errors[1], /^HEXA 코어: .*제공되지/);
@@ -92,11 +97,38 @@ test('authentication failures also stop optional requests immediately', async ()
   }
 });
 
+test('sixth-job skill failure is optional and leaves other data intact', async () => {
+  for (const missing of [{}, http(500)]) {
+    const { load, calls } = fixture([...good.slice(0, 5), missing]);
+    const result = await load();
+    assert.deepEqual(result.stats, stats);
+    assert.deepEqual(result.hexa, hexa);
+    assert.equal(result.skills, null);
+    assert.equal(result.errors.length, 1);
+    assert.match(result.errors[0], /^6차 스킬: /);
+    assert.equal(calls.length, 6);
+  }
+});
+
+test('sixth-job skill request preserves authentication and cancellation failures', async () => {
+  const denied = fixture([...good.slice(0, 5), http(403)]);
+  await assert.rejects(denied.load(), error => error.status === 403);
+  assert.equal(denied.calls.length, 6);
+
+  const controller = new AbortController();
+  const aborted = fixture([...good.slice(0, 5), (_url, options) => new Promise((_resolve, reject) => {
+    options.signal.addEventListener('abort', () => reject(new Error(fakeKey)), { once: true });
+    controller.abort();
+  })]);
+  await assert.rejects(aborted.load({ signal: controller.signal }), error => error.name === 'AbortError' && !error.message.includes(fakeKey));
+  assert.equal(aborted.calls.length, 6);
+});
+
 test('rate limit retries succeed, but retry count is bounded at two', async () => {
   const successful = fixture([http(429), http(429), ...good]);
   const result = await successful.load();
   assert.deepEqual(result.stats, stats);
-  assert.equal(successful.calls.length, 7);
+  assert.equal(successful.calls.length, 8);
   const exhausted = fixture([http(429), http(429), http(429)]);
   await assert.rejects(exhausted.load(), error => error.status === 429 && /조회 한도/.test(error.message));
   assert.equal(exhausted.calls.length, 3);

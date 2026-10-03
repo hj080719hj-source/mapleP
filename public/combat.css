@@ -130,6 +130,10 @@
 .precision-toolbar{display:flex;gap:12px;align-items:end;flex-wrap:wrap}
 .precision-toolbar>.field{flex:1 1 220px;max-width:400px}
 #precision-result{display:grid;gap:12px}
+#precision-combined{display:grid;gap:14px;padding:16px;border:1px solid #765126;border-radius:9px;background:#19130b}
+#precision-combined[hidden],#precision-context[hidden]{display:none}
+#precision-combined h3{margin:0;font-size:14px;line-height:1.8}
+#precision-context{display:grid;gap:10px}
 .precision-baseline>form{margin-top:16px}
 .precision-panel details .hint{margin-top:12px}
 .precision-coverage{padding:12px;border:1px solid #574021;border-radius:8px;color:#eac79a;font-size:12px;line-height:1.9}

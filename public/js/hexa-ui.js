@@ -174,6 +174,8 @@ export function createHexaView(host, { getCurrentScore, getMeasurement, onChange
     setPractice(data) { practice = data; chooseSource(data ? 'practice' : 'manual'); },
     refresh: update,
     getProjection: projection,
+    getScenario() { return { rows: effectiveRows(), settings: clone(settings), source, consistent: projection().consistent,
+      measurement: source === 'practice' ? practiceMeasurement(practice) : getMeasurement(), practice, liveClass: character?.basic?.character_class }; },
     reset() { character = null; practice = null; rows = []; source = 'manual'; imported = null; settings = {}; manualDraft = {}; applyBoss = true; $('hexa-apply-boss').checked = true; clearFilters(); renderRows(); },
   };
 }

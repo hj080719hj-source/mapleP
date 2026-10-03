@@ -87,12 +87,14 @@ export function calculatePrecision({ before, after, rows, measurement, sourceDef
     multiplier: row.multiplier,
     projectedShare: multiplier > 0 ? row.contribution / multiplier * 100 : 0,
     baseWeight: row.unscaledWeight / weightSum,
+    sourceScoreContribution: row.unscaledWeight / weightSum * row.fixedSourceResponse / MODEL.damagePerPoint,
+    targetScoreContribution: row.unscaledWeight / weightSum * row.fixedTargetResponse / MODEL.damagePerPoint,
   }));
   const sourceScore = sum(responses.map((row, i) => outputRows[i].baseWeight * row.fixedSourceResponse)) / MODEL.damagePerPoint;
   const targetScore = sum(responses.map((row, i) => outputRows[i].baseWeight * row.fixedTargetResponse)) / MODEL.damagePerPoint;
   const projectedDps = measuredDps * multiplier, projectedDamage = damage * multiplier;
   const numbers = [multiplier, projectedDps, projectedDamage, sourceScore, targetScore,
-    ...outputRows.flatMap(row => [row.multiplier, row.projectedShare, row.baseWeight])];
+    ...outputRows.flatMap(row => [row.multiplier, row.projectedShare, row.baseWeight, row.sourceScoreContribution, row.targetScoreContribution])];
   if (!numbers.every(value => Number.isFinite(value) && value >= 0)
     || (multiplier > 0 && (projectedDps <= 0 || projectedDamage <= 0))
     || (sourceScore <= 0 && responses.some(row => row.fixedSourceResponse > 0))
@@ -100,5 +102,5 @@ export function calculatePrecision({ before, after, rows, measurement, sourceDef
     || outputRows.some(row => row.baseWeight <= 0)) return fail('스킬별 보정 결과가 계산 가능한 범위를 벗어났습니다.');
   return { ok: true, multiplier, projectedDps, measuredDps, projectedDamage,
     sourceScore, targetScore, sourceDefense: sourceP, targetDefense: targetP,
-    scoreDefense: MODEL.defense, totalShare, rows: outputRows };
+    scoreDefense: MODEL.defense, totalShare, rows: outputRows, measurement: { totalDamage: damage, seconds } };
 }

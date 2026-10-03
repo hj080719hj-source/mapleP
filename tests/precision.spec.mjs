@@ -26,8 +26,11 @@ const skills = { character_skill: [
   skill(buffName, '30초 동안 보스 몬스터 공격 시 데미지 40%, 크리티컬 확률 100% 증가', '30초 동안 보스 몬스터 공격 시 데미지 41%, 크리티컬 확률 100% 증가'),
 ] };
 const weightedDefenseRatio = (.81 / .62 + .905 / .81) / 2;
+const combinedRatio = .5 * (.81 / .62) * 1.1 + .5 * (.905 / .81);
 
-async function connect(page, { currentIgnoreDefense = 90 } = {}) {
+async function connect(page, { currentIgnoreDefense = 90, recordedBuffLevel = 10 } = {}) {
+  const recordedCores = cores.map(row => row.hexa_core_name === buffName ? { ...row, hexa_core_level: recordedBuffLevel } : row);
+  const recordedSkills = { character_skill: skills.character_skill.map(row => row.skill_name === buffName ? { ...row, skill_level: recordedBuffLevel } : row) };
   const responses = {
     id: { ocid: 'precision-synthetic-ocid' },
     'character/basic': person,
@@ -45,8 +48,8 @@ async function connect(page, { currentIgnoreDefense = 90 } = {}) {
     },
     'battle-practice/character-info': {
       basic_object: person, stat_object: { basic_stat_object: apiStats(baseline) },
-      hexa_matrix_object: { hexa_core_object: { character_hexa_core_equipment: cores } },
-      skill_object: skills,
+      hexa_matrix_object: { hexa_core_object: { character_hexa_core_equipment: recordedCores } },
+      skill_object: recordedSkills,
     },
   };
   await page.route('https://open.api.nexon.com/**', async route => {
@@ -200,7 +203,7 @@ test('practice keeps historical stats and raw-damage shares and rejects edited m
   await expect(page.locator('#boss-estimate')).toHaveText('5분 0초');
 });
 
-test('precision and a selected HEXA projection cannot both multiply the same measured boss damage', async ({ page }) => {
+test('combined projection multiplies each skill response before summing damage shares', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await connect(page);
   await manualSetup(page);
@@ -208,11 +211,17 @@ test('precision and a selected HEXA projection cannot both multiply the same mea
   const hexa = page.locator('#hexa-rows .hexa-row').filter({ hasText: plainName });
   await hexa.locator('[data-hexa-share]').fill('50');
   await hexa.locator('[data-hexa-enabled]').check();
+  await expect.poll(async () => Number((await page.locator('#combined-growth').innerText()).replace(/[^\d.-]/g, ''))).toBeCloseTo((combinedRatio - 1) * 100, 1);
+  await expect(page.locator('#combined-score')).toContainText('44,853');
+  await expect(page.locator('#combined-dps')).toHaveText('1.2772조 / 초');
+  await expect(page.locator('#precision-score')).toContainText('42,559');
+  await expectGrowth(page, (weightedDefenseRatio - 1) * 100);
   await page.locator('#hexa-apply-boss').check();
   await page.locator('#precision-apply-boss').check();
-  await expect(page.locator('#boss-estimate')).toHaveCount(0);
-  await expect(page.locator('#boss-output')).toContainText(/HEXA/);
-  await expect(page.locator('#boss-output')).toContainText(/스킬 보정/);
+  await expect(page.locator('#boss-estimate')).toHaveText('7분 50초');
+  await page.locator('.combined-breakdown > summary').click();
+  await expect(page.locator('.combined-breakdown')).toContainText(plainName);
+  await expect(page.locator('.combined-breakdown')).toContainText(pierceName);
   await page.locator('#hexa-apply-boss').uncheck();
   await expect(page.locator('#boss-estimate')).toHaveText('8분 16초');
   await row(page, pierceName).locator('details > summary').click();
@@ -220,8 +229,64 @@ test('precision and a selected HEXA projection cannot both multiply the same mea
   await page.locator('#clear-character').click();
   await expect(page.locator('#precision-rows .precision-row')).toHaveCount(0);
   await expect(page.locator('#precision-score')).toHaveCount(0);
+  await expect(page.locator('#combined-score')).toHaveCount(0);
   await expect(page.locator('#combat-api-key')).toHaveValue('');
   expect(await page.evaluate(() => JSON.stringify({ local: { ...localStorage }, session: { ...sessionStorage } }))).not.toContain(fakeKey);
+});
+
+test('combined projection rejects mismatched skill shares and mixed measurement sources', async ({ page }) => {
+  await connect(page);
+  await manualSetup(page);
+  await page.locator('#ignore-defense').fill('95');
+  const hexa = page.locator('#hexa-rows .hexa-row').filter({ hasText: plainName });
+  await hexa.locator('[data-hexa-share]').fill('40');
+  await hexa.locator('[data-hexa-enabled]').check();
+  await page.locator('#hexa-apply-boss').check();
+  await page.locator('#precision-apply-boss').check();
+  await expect(page.locator('#combined-growth')).toHaveCount(0);
+  await expect(page.locator('#precision-combined')).toContainText(/점유율/);
+  await expect(page.locator('#boss-estimate')).toHaveCount(0);
+  await hexa.locator('[data-hexa-share]').fill('50');
+  await expect(page.locator('#combined-dps')).toHaveText('1.2772조 / 초');
+  await expect(page.locator('#boss-estimate')).toHaveText('7분 50초');
+
+  await page.locator('#load-practice').click();
+  await expect(page.locator('#practice-status')).toContainText('가장 최근 등록 기록');
+  await expect(page.locator('#precision-source')).toHaveValue('practice');
+  await page.locator('#precision-source-defense').fill('380');
+  await row(page, plainName).locator('[data-precision-confirmed]').check();
+  await row(page, pierceName).locator('[data-precision-confirmed]').check();
+  await page.locator('#precision-conditions').check();
+  await page.locator('#hexa-source').selectOption('manual');
+  await expect(hexa.locator('[data-hexa-enabled]')).toBeChecked();
+  await page.locator('#hexa-apply-boss').check();
+  await page.locator('#precision-apply-boss').check();
+  await expect(page.locator('#combined-growth')).toHaveCount(0);
+  await expect(page.locator('#precision-combined')).toContainText(/기준|출처/);
+  await expect(page.locator('#boss-estimate')).toHaveCount(0);
+  await expectGrowth(page, (weightedDefenseRatio - 1) * 100);
+});
+
+test('a changed unselected core blocks combining historical measurements with current HEXA effects', async ({ page }) => {
+  await connect(page, { currentIgnoreDefense: 95, recordedBuffLevel: 9 });
+  await page.locator('#load-practice').click();
+  await expect(page.locator('#practice-status')).toContainText('가장 최근 등록 기록');
+  await expect(page.locator('#precision-source')).toHaveValue('practice');
+  await page.locator('#precision-source-defense').fill('380');
+  await row(page, plainName).locator('[data-precision-confirmed]').check();
+  await row(page, pierceName).locator('[data-precision-confirmed]').check();
+  await page.locator('#precision-conditions').check();
+  await expectGrowth(page, (weightedDefenseRatio - 1) * 100);
+  await expect(page.locator('#precision-context')).toContainText(/코어|레벨|효과|변경/);
+  const hexa = page.locator('#hexa-rows .hexa-row').filter({ hasText: plainName });
+  await hexa.locator('[data-hexa-enabled]').check();
+  await page.locator('#hexa-apply-boss').check();
+  await page.locator('#precision-apply-boss').check();
+  await page.locator('#boss-hp').fill('600');
+  await expect(page.locator('#combined-growth')).toHaveCount(0);
+  await expect(page.locator('#precision-combined')).toContainText(/코어|레벨|효과|변경/);
+  await expect(page.locator('#boss-estimate')).toHaveCount(0);
+  await expectGrowth(page, (weightedDefenseRatio - 1) * 100);
 });
 
 test('changing the measurement source, measured totals, or skill draft requires fresh confirmation', async ({ page }) => {

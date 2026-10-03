@@ -126,12 +126,34 @@
 .hexa-apply{display:flex;align-items:start;gap:9px;font-size:12px;line-height:1.9}
 .hexa-panel>details>a{display:inline-block;color:#f7b15e;margin-top:12px;font-size:11px}
 .boss-progress{display:grid;gap:12px}
+.precision-panel{display:grid;gap:18px;scroll-margin-top:18px}
+.precision-toolbar{display:flex;gap:12px;align-items:end;flex-wrap:wrap}
+.precision-toolbar>.field{flex:1 1 220px;max-width:400px}
+#precision-result{display:grid;gap:12px}
+.precision-baseline>form{margin-top:16px}
+.precision-panel details .hint{margin-top:12px}
+.precision-coverage{padding:12px;border:1px solid #574021;border-radius:8px;color:#eac79a;font-size:12px;line-height:1.9}
+.precision-rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.precision-row{display:grid;gap:10px;min-width:0;padding:14px;border:1px solid #44321f;border-radius:9px;background:#13100c}
+.precision-row-heading{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.precision-row-heading>strong{flex:1 1 100%;font-size:12px;line-height:1.8}
+.precision-row-heading>.field{width:115px}
+.precision-row-heading>button{margin-left:auto}
+.precision-check{display:flex;gap:8px;align-items:start;font-size:11px;line-height:1.9}
+.precision-check>input{flex:none;accent-color:var(--orange);margin:3px 0 0;width:16px;height:16px}
+.precision-effect{font:inherit;font-size:10px;color:var(--muted);white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.9;margin:12px 0 0}
+.precision-notes{margin:12px 0 0;padding-left:17px;color:#d4ae7b;font-size:10px;line-height:1.9}
+.precision-panel details>a{display:inline-block;margin-top:12px;font-size:11px;color:#f7b15e}
 .boss-progress .metric>strong{font-size:22px}
 .combat-page .metric>span{word-break:keep-all}
 #boss-hexa-comparison>span{display:block;word-break:keep-all}
 .metric #boss-hexa-comparison>small{display:block;margin:2px 0;font-size:12px}
 @media(max-width:1000px){.combat-workspace{grid-template-columns:1fr}.combat-summary h2{font-size:18px}}
 @media(max-width:600px){
+  .precision-rows{grid-template-columns:1fr}
+  .precision-toolbar>.field{flex-basis:100%;max-width:none}
+  .precision-toolbar>button{flex:1}
+  .precision-row .combat-fields{grid-template-columns:1fr}
   .hexa-rows{grid-template-columns:1fr}
   .hexa-toolbar>.field{flex-basis:100%;max-width:none}
   .hexa-toolbar>button{flex:1}

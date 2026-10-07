@@ -146,6 +146,10 @@
 .precision-check{display:flex;gap:8px;align-items:start;font-size:11px;line-height:1.9}
 .precision-check>input{flex:none;accent-color:var(--orange);margin:3px 0 0;width:16px;height:16px}
 .precision-effect{font:inherit;font-size:10px;color:var(--muted);white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.9;margin:12px 0 0}
+.upgrade-panel{display:grid;gap:16px;border-top:1px solid #382819;padding-top:20px}
+.upgrade-plan{min-width:0;overflow-wrap:anywhere}
+.upgrade-plan pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:10px;max-height:250px;overflow:auto}
+.upgrade-plan h4{margin:10px 0}
 .precision-notes{margin:12px 0 0;padding-left:17px;color:#d4ae7b;font-size:10px;line-height:1.9}
 .precision-panel details>a{display:inline-block;margin-top:12px;font-size:11px;color:#f7b15e}
 .boss-progress .metric>strong{font-size:22px}

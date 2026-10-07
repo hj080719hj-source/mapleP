@@ -136,7 +136,7 @@ export function createPrecisionView(host, { getCurrentStats, getMeasurement, get
         ok: result.ok && result.consistent && (!combined || combined.ok),
         message: combined && !combined.ok ? combined.message : result.message || '측정 조건과 스킬 보정을 확인해주세요.',
         signature: JSON.stringify({ source, before: readBefore(), rows, measurement: getMeasurement(), defense: $('precision-source-defense').value, record: practice?.replay?.register_date }),
-        scenario: { after: getCurrentStats(), settings: scenario?.settings },
+        scenario: { after: getCurrentStats(), settings: scenario?.settings, cores: scenario?.rows?.filter(row => scenario.settings[row.id]?.enabled).map(row => ({ name: row.name, level: row.level, nextLevel: row.nextLevel })) },
         baselineScore: result.sourceScore,
         minScore: combined ? combined.minScore : result.targetScore,
         maxScore: combined ? combined.maxScore : result.targetScore,

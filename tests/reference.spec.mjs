@@ -34,3 +34,35 @@ test('no reference is prefilled and changing mode clears calibration', async ({ 
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });
+
+test('upgrade plans freeze settings, rank costs, filter budget and clear with anchor', async ({ page }) => {
+  await prepare(page);
+  await page.locator('#upgrade-target').fill('93000');
+  await expect(page.locator('#upgrade-gap')).toContainText('목표 미달');
+  await page.locator('#boss-stat').fill('350');
+  await expect(page.locator('#upgrade-gap')).toContainText('범위 전체가 목표 충족');
+  async function save(name, cost, method) {
+    await page.locator('#upgrade-name').fill(name);
+    await page.locator('#upgrade-cost').fill(cost);
+    await page.locator('#upgrade-method').selectOption(method);
+    await page.locator('#upgrade-save').click();
+  }
+  await save('구매 세팅', '100', 'buy');
+  await save('강화 세팅', '80', 'craft');
+  await expect(page.locator('.upgrade-plan').first()).toContainText('강화 세팅');
+  await page.locator('#boss-stat').fill('300');
+  await expect(page.locator('.upgrade-plan').first()).toContainText('93,464');
+  await page.locator('.upgrade-plan').first().locator('summary').click();
+  await expect(page.locator('.upgrade-plan').first()).toContainText('300 → 350');
+  await page.locator('#upgrade-budget').fill('90');
+  await expect(page.locator('[data-plan-id="1"]')).toContainText('예산 초과');
+  await page.locator('#upgrade-budget').fill('70');
+  await expect(page.locator('#upgrade-ranking')).toContainText('모두 충족하는 후보가 없습니다');
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  await page.locator('[data-remove-plan="1"]').click();
+  await expect(page.locator('.upgrade-plan')).toHaveCount(1);
+  await page.locator('#reference-clear').click();
+  await expect(page.locator('.upgrade-plan')).toHaveCount(0);
+  await expect(page.locator('#upgrade-save')).toBeDisabled();
+});

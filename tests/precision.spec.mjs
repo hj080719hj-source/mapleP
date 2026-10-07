@@ -28,6 +28,25 @@ const skills = { character_skill: [
 const weightedDefenseRatio = (.81 / .62 + .905 / .81) / 2;
 const combinedRatio = .5 * (.81 / .62) * 1.1 + .5 * (.905 / .81);
 
+test('reference anchor tracks precision stat and HEXA changes but invalidates changed measurement basis', async ({ page }) => {
+  await connect(page);
+  await manualSetup(page);
+  await page.locator('#reference-source').selectOption('precision');
+  await page.locator('#reference-value').fill('90000');
+  await page.locator('#reference-confirm').check();
+  await page.locator('#reference-capture').click();
+  await expect(page.locator('#reference-prediction')).toHaveText('90,000');
+  await page.locator('#ignore-defense').fill('95');
+  const statOnly = Number((await page.locator('#reference-prediction').innerText()).replaceAll(',', ''));
+  expect(statOnly).toBeGreaterThan(90000);
+  const hexa = page.locator('#hexa-rows .hexa-row').filter({ hasText: plainName });
+  await hexa.locator('[data-hexa-share]').fill('50');
+  await hexa.locator('[data-hexa-enabled]').check();
+  expect(Number((await page.locator('#reference-prediction').innerText()).replaceAll(',', ''))).toBeGreaterThan(statOnly);
+  await row(page, plainName).locator('[data-precision-share]').fill('40');
+  await expect(page.locator('#reference-prediction')).toHaveCount(0);
+});
+
 async function connect(page, { currentIgnoreDefense = 90, recordedBuffLevel = 10 } = {}) {
   const recordedCores = cores.map(row => row.hexa_core_name === buffName ? { ...row, hexa_core_level: recordedBuffLevel } : row);
   const recordedSkills = { character_skill: skills.character_skill.map(row => row.skill_name === buffName ? { ...row, skill_level: recordedBuffLevel } : row) };

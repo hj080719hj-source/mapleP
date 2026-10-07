@@ -127,6 +127,21 @@ export function createPrecisionView(host, { getCurrentStats, getMeasurement, get
     setPractice(data) { practice = data; chooseSource(data ? 'practice' : 'manual'); },
     refresh: update,
     getProjection: projection,
+    getReferenceBasis() {
+      const result = projection();
+      const scenario = getHexaScenario?.();
+      const selected = Object.values(scenario?.settings || {}).some(setting => setting.enabled);
+      const combined = selected ? combinedProjection(result, scenario) : null;
+      return {
+        ok: result.ok && result.consistent && (!combined || combined.ok),
+        message: combined && !combined.ok ? combined.message : result.message || '측정 조건과 스킬 보정을 확인해주세요.',
+        signature: JSON.stringify({ source, before: readBefore(), rows, measurement: getMeasurement(), defense: $('precision-source-defense').value, record: practice?.replay?.register_date }),
+        scenario: { after: getCurrentStats(), settings: scenario?.settings },
+        baselineScore: result.sourceScore,
+        minScore: combined ? combined.minScore : result.targetScore,
+        maxScore: combined ? combined.maxScore : result.targetScore,
+      };
+    },
     getCombinedProjection: combinedProjection,
     reset() { context = null; confirmedMeasurement = null; character = null; practice = null; source = 'manual'; rows = []; warnings = []; dataError = ''; manualDraft = null; recordBefore = null; writeBefore(null); $('precision-source-defense').value = ''; $('precision-target-defense').value = '380'; $('precision-conditions').checked = $('precision-apply-boss').checked = false; $('precision-add-name').value = ''; $('precision-add-status').textContent = ''; renderRows(); },
   };

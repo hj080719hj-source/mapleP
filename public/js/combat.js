@@ -2,6 +2,7 @@ import { loadCharacter, loadPractice } from './character-api.js';
 import { MODEL, inputsFromStats, calculateScore, estimateBoss, compareBossForecast, equipmentOverview, practiceMeasurement, statMap, numberValue } from './combat-model.js';
 import { createHexaView } from './hexa-ui.js';
 import { createPrecisionView } from './precision-ui.js';
+import { createReferenceView } from './reference-ui.js';
 
 const $ = id => document.getElementById(id);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
@@ -9,7 +10,7 @@ const fmt = (value, digits = 0) => Number.isFinite(value) ? value.toLocaleString
 const damageText = value => value >= 1e12 ? `${fmt(value / 1e12, 2)}조` : value >= 1e8 ? `${fmt(value / 1e8, 2)}억` : fmt(value);
 const fieldIds = { minAttack: 'min-attack', maxAttack: 'max-attack', damage: 'damage-stat', bossDamage: 'boss-stat', critRate: 'crit-rate', critDamage: 'crit-damage', ignoreDefense: 'ignore-defense' };
 let apiKey = '', character = null, practice = null, original = null, controller, revision = 0, busy = false;
-let hexaView, precisionView;
+let hexaView, precisionView, referenceView;
 
 function status(id, message, error = false) { $(id).textContent = message; $(id).className = error ? 'error' : 'hint'; }
 function setBusy(value) {
@@ -28,6 +29,7 @@ function clearPractice() {
   precisionView.setPractice(null);
 }
 function clearCharacter() {
+  referenceView?.reset();
   revision++; controller?.abort(); apiKey = ''; character = null; original = null;
   $('combat-api-key').value = ''; $('combat-api-key').required = true;
   $('combat-results').hidden = true; $('combat-results').replaceChildren();
@@ -144,7 +146,11 @@ precisionView = createPrecisionView($('precision-panel'), {
   getCurrentStats: readInputs,
   getHexaScenario: () => hexaView.getScenario(),
   getMeasurement: () => ({ totalDamage: Number($('total-damage').value) * 1e12, seconds: Number($('battle-seconds').value) }),
-  onChange: renderBoss,
+  onChange: () => { renderBoss(); referenceView?.refresh(); },
+});
+referenceView = createReferenceView($('reference-panel'), {
+  getBasic: () => ({ ...calculateScore(readInputs()), scenario: readInputs() }),
+  getPrecision: () => precisionView.getReferenceBasis(),
 });
 
 $('character-form').addEventListener('submit', async event => {
